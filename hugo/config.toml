@@ -1,0 +1,15 @@
+baseURL = "http://localhost:1313/"
+languageCode = "en-us"
+title = "Dgraph Reddit Tutorial"
+author = "Gabe Wyatt"
+theme = "hugo-docs"
+
+[blackfriday]
+  taskLists = false
+  fencedCode = true
+
+[[menu.main]]
+  name        = "Dgraph Reddit Tutorial"
+  url         = "/"
+  identifier  = "home"
+  weight      = -1
