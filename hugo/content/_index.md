@@ -51,7 +51,7 @@ Let's also take a moment to install some additional dependencies we'll need to g
 
 ```bash
 yarn add dgraph-js-http gulp gulp-typescript
-yarn add -D @babel/polyfill @types/gulp @types/node ts-node
+yarn add -D @babel/polyfill @types/gulp @types/node ts-node cli-progress @types/cli-progress
 ```
 
 ## Prettier & TSLint
@@ -660,11 +660,56 @@ Since these data sets start to get quite huge, we'll just use a small sampling t
 If you look at the content of one of the `RS_` or `RC_` Reddit data dump files, you'll see they are in single-line JSON format.
 
 ```json
-{"archived":false,"author":"transcribersofreddit","author_flair_css_class":null,"author_flair_text":"Official Bot","brand_safe":false,"contest_mode":false,"created_utc":1517443200,"distinguished":null,"domain":"reddit.com","edited":false,"gilded":0,"hidden":false,"hide_score":false,"id":"7ueit6","is_crosspostable":false,"is_reddit_media_domain":false,"is_self":false,"is_video":false,"link_flair_css_class":"unclaimed","link_flair_text":"Unclaimed","locked":false,"media":null,"media_embed":{},"no_follow":true,"num_comments":1,"num_crossposts":0,"over_18":false,"parent_whitelist_status":null,"permalink":"/r/TranscribersOfReddit/comments/7ueit6/toomeirlformeirl_image_toomeirlformeirl/","pinned":false,"retrieved_on":1520467337,"score":1,"secure_media":null,"secure_media_embed":{},"selftext":"","send_replies":true,"spoiler":false,"stickied":false,"subreddit":"TranscribersOfReddit","subreddit_id":"t5_3jqmx","subreddit_type":"public","suggested_sort":null,"thumbnail":"default","thumbnail_height":140,"thumbnail_width":140,"title":"TooMeIrlForMeIrl | Image | \"TooMeIrlForMeIrl\"","url":"https://reddit.com/r/TooMeIrlForMeIrl/comments/7ueit3/toomeirlformeirl/","whitelist_status":null}
-{"archived":false,"author":"ChineseToTheBone","author_flair_css_class":null,"author_flair_text":null,"brand_safe":true,"contest_mode":false,"created_utc":1517443200,"distinguished":null,"domain":"timedotcom.files.wordpress.com","edited":false,"gilded":0,"hidden":false,"hide_score":false,"id":"7ueit7","is_crosspostable":false,"is_reddit_media_domain":false,"is_self":false,"is_video":false,"link_flair_css_class":null,"link_flair_text":null,"locked":false,"media":null,"media_embed":{},"no_follow":false,"num_comments":21,"num_crossposts":0,"over_18":false,"parent_whitelist_status":"all_ads","permalink":"/r/WarshipPorn/comments/7ueit7/electromagnetic_railgun_prototype_on_a_type/","pinned":false,"post_hint":"image","preview":{"enabled":true,"images":[{"id":"mnTR7sMg1LvUV1SaPwqTMtE1hn0QaOoB8slCBSnVGlM","resolutions":[{"height":60,"url":"https://i.redditmedia.com/r-rXD7r_Fm-oQf2xayPEwWW5o_a8rYkGteHwnE34GwY.jpg?fit=crop&amp;crop=faces%2Centropy&amp;arh=2&amp;w=108&amp;fm=jpg&amp;s=860648187a15d64e23b4e26ec9f73450","width":108},{"height":121,"url":"https://i.redditmedia.com/r-rXD7r_Fm-oQf2xayPEwWW5o_a8rYkGteHwnE34GwY.jpg?fit=crop&amp;crop=faces%2Centropy&amp;arh=2&amp;w=216&amp;fm=jpg&amp;s=44c73232a1cbe7939206633afca6e0e6","width":216},{"height":180,"url":"https://i.redditmedia.com/r-rXD7r_Fm-oQf2xayPEwWW5o_a8rYkGteHwnE34GwY.jpg?fit=crop&amp;crop=faces%2Centropy&amp;arh=2&amp;w=320&amp;fm=jpg&amp;s=ca7e78f1f179ae6827ffcc75469a04c5","width":320},{"height":360,"url":"https://i.redditmedia.com/r-rXD7r_Fm-oQf2xayPEwWW5o_a8rYkGteHwnE34GwY.jpg?fit=crop&amp;crop=faces%2Centropy&amp;arh=2&amp;w=640&amp;fm=jpg&amp;s=523767d80539666ab2695cdfee811909","width":640},{"height":540,"url":"https://i.redditmedia.com/r-rXD7r_Fm-oQf2xayPEwWW5o_a8rYkGteHwnE34GwY.jpg?fit=crop&amp;crop=faces%2Centropy&amp;arh=2&amp;w=960&amp;fm=jpg&amp;s=11227a7dad425381fdb0f3ba1386b203","width":960},{"height":607,"url":"https://i.redditmedia.com/r-rXD7r_Fm-oQf2xayPEwWW5o_a8rYkGteHwnE34GwY.jpg?fit=crop&amp;crop=faces%2Centropy&amp;arh=2&amp;w=1080&amp;fm=jpg&amp;s=cffddfeb4780f5303a86707177b2b87f","width":1080}],"source":{"height":1080,"url":"https://i.redditmedia.com/r-rXD7r_Fm-oQf2xayPEwWW5o_a8rYkGteHwnE34GwY.jpg?fm=jpg&amp;s=f591b4d38b2544fc7a94d43b993ec5db","width":1920},"variants":{}}]},"retrieved_on":1520467337,"score":144,"secure_media":null,"secure_media_embed":{},"selftext":"","send_replies":true,"spoiler":false,"stickied":false,"subreddit":"WarshipPorn","subreddit_id":"t5_2tg3p","subreddit_type":"public","suggested_sort":null,"thumbnail":"https://b.thumbs.redditmedia.com/1TaGs8QGKSK4Ko7jGn_iTwWXFRdQc1TF6Iv1it-Y47Y.jpg","thumbnail_height":78,"thumbnail_width":140,"title":"Electromagnetic Railgun Prototype on a Type 072III-Class Landing Ship [1920 \u00d7 1080]","url":"https://timedotcom.files.wordpress.com/2018/01/railgun-1.jpg","whitelist_status":"all_ads"}
-{"archived":false,"author":"Rainewood","author_flair_css_class":null,"author_flair_text":null,"brand_safe":true,"contest_mode":false,"created_utc":1517443200,"distinguished":null,"domain":"self.AskReddit","edited":false,"gilded":0,"hidden":false,"hide_score":false,"id":"7ueit9","is_crosspostable":false,"is_reddit_media_domain":false,"is_self":true,"is_video":false,"link_flair_css_class":null,"link_flair_text":null,"locked":false,"media":null,"media_embed":{},"no_follow":false,"num_comments":9,"num_crossposts":0,"over_18":false,"parent_whitelist_status":"all_ads","permalink":"/r/AskReddit/comments/7ueit9/redditors_who_have_a_chronic_pain/","pinned":false,"retrieved_on":1520467337,"score":3,"secure_media":null,"secure_media_embed":{},"selftext":"","send_replies":true,"spoiler":false,"stickied":false,"subreddit":"AskReddit","subreddit_id":"t5_2qh1i","subreddit_type":"public","suggested_sort":null,"thumbnail":"self","thumbnail_height":null,"thumbnail_width":null,"title":"Redditors who have a chronic pain disorder/invisible disability, what event led to your diagnosis? Did you struggle with medical professionals not believing you?","url":"https://www.reddit.com/r/AskReddit/comments/7ueit9/redditors_who_have_a_chronic_pain/","whitelist_status":"all_ads"}
-{"archived":false,"author":"GEEpeachProductions","author_flair_css_class":null,"author_flair_text":null,"brand_safe":false,"contest_mode":false,"created_utc":1517443200,"distinguished":null,"domain":"vimeo.com","edited":false,"gilded":0,"hidden":false,"hide_score":false,"id":"7ueita","is_crosspostable":false,"is_reddit_media_domain":false,"is_self":false,"is_video":false,"link_flair_css_class":null,"link_flair_text":null,"locked":false,"media":{"oembed":{"author_name":"Georgia Pearce","author_url":"https://vimeo.com/geepeach","description":"This short independent film focusses on the life of George Singleton, currently living on the streets of London, who cleans the canals tirelessly everyday, in a bit to reduce the plastic and waste pollution in our water ways. The film touches upon homelessness, veganism and pollution in our waters.","height":338,"html":"&lt;iframe class=\"embedly-embed\" src=\"https://cdn.embedly.com/widgets/media.html?src=https%3A%2F%2Fplayer.vimeo.com%2Fvideo%2F253329987&amp;dntp=1&amp;url=https%3A%2F%2Fvimeo.com%2F253329987&amp;image=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F680407880_1280.jpg&amp;key=2aa3c4d5f3de4f5b9120b660ad850dc9&amp;type=text%2Fhtml&amp;schema=vimeo\" width=\"600\" height=\"338\" scrolling=\"no\" frameborder=\"0\" allowfullscreen&gt;&lt;/iframe&gt;","provider_name":"Vimeo","provider_url":"https://vimeo.com/","thumbnail_height":720,"thumbnail_url":"https://i.embed.ly/1/image?url=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F680407880_1280.jpg&amp;key=b1e305db91cf4aa5a86b732cc9fffceb","thumbnail_width":1280,"title":"bridge 32","type":"video","version":"1.0","width":600},"type":"vimeo.com"},"media_embed":{"content":"&lt;iframe class=\"embedly-embed\" src=\"https://cdn.embedly.com/widgets/media.html?src=https%3A%2F%2Fplayer.vimeo.com%2Fvideo%2F253329987&amp;dntp=1&amp;url=https%3A%2F%2Fvimeo.com%2F253329987&amp;image=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F680407880_1280.jpg&amp;key=2aa3c4d5f3de4f5b9120b660ad850dc9&amp;type=text%2Fhtml&amp;schema=vimeo\" width=\"600\" height=\"338\" scrolling=\"no\" frameborder=\"0\" allowfullscreen&gt;&lt;/iframe&gt;","height":338,"media_domain_url":"https://www.redditmedia.com/mediaembed/7ueita","scrolling":false,"width":600},"no_follow":true,"num_comments":0,"num_crossposts":0,"over_18":false,"parent_whitelist_status":null,"permalink":"/r/oceans/comments/7ueita/george_lives_on_the_streets_of_london_and/","pinned":false,"retrieved_on":1520467337,"score":1,"secure_media":{"oembed":{"author_name":"Georgia Pearce","author_url":"https://vimeo.com/geepeach","description":"This short independent film focusses on the life of George Singleton, currently living on the streets of London, who cleans the canals tirelessly everyday, in a bit to reduce the plastic and waste pollution in our water ways. The film touches upon homelessness, veganism and pollution in our waters.","height":338,"html":"&lt;iframe class=\"embedly-embed\" src=\"https://cdn.embedly.com/widgets/media.html?src=https%3A%2F%2Fplayer.vimeo.com%2Fvideo%2F253329987&amp;dntp=1&amp;url=https%3A%2F%2Fvimeo.com%2F253329987&amp;image=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F680407880_1280.jpg&amp;key=2aa3c4d5f3de4f5b9120b660ad850dc9&amp;type=text%2Fhtml&amp;schema=vimeo\" width=\"600\" height=\"338\" scrolling=\"no\" frameborder=\"0\" allowfullscreen&gt;&lt;/iframe&gt;","provider_name":"Vimeo","provider_url":"https://vimeo.com/","thumbnail_height":720,"thumbnail_url":"https://i.embed.ly/1/image?url=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F680407880_1280.jpg&amp;key=b1e305db91cf4aa5a86b732cc9fffceb","thumbnail_width":1280,"title":"bridge 32","type":"video","version":"1.0","width":600},"type":"vimeo.com"},"secure_media_embed":{"content":"&lt;iframe class=\"embedly-embed\" src=\"https://cdn.embedly.com/widgets/media.html?src=https%3A%2F%2Fplayer.vimeo.com%2Fvideo%2F253329987&amp;dntp=1&amp;url=https%3A%2F%2Fvimeo.com%2F253329987&amp;image=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F680407880_1280.jpg&amp;key=2aa3c4d5f3de4f5b9120b660ad850dc9&amp;type=text%2Fhtml&amp;schema=vimeo\" width=\"600\" height=\"338\" scrolling=\"no\" frameborder=\"0\" allowfullscreen&gt;&lt;/iframe&gt;","height":338,"media_domain_url":"https://www.redditmedia.com/mediaembed/7ueita","scrolling":false,"width":600},"selftext":"","send_replies":true,"spoiler":false,"stickied":false,"subreddit":"oceans","subreddit_id":"t5_2s7su","subreddit_type":"public","suggested_sort":null,"thumbnail":"default","thumbnail_height":78,"thumbnail_width":140,"title":"George lives on the streets of London, and everyday tirelessly cleans the canals in a bid to reduce the pollution in our water ways. The film touches upon homelessness, veganism and plastic pollution. Please watch, and if you can, a donation would be hugely appreciated! Thank you","url":"https://vimeo.com/253329987?ref=fb-share&amp;1","whitelist_status":null}
-{"archived":false,"author":"CalligraBot","author_flair_css_class":null,"author_flair_text":null,"brand_safe":true,"contest_mode":false,"created_utc":1517443200,"distinguished":null,"domain":"self.Calligraphy","edited":false,"gilded":0,"hidden":false,"hide_score":false,"id":"7ueitb","is_crosspostable":false,"is_reddit_media_domain":false,"is_self":true,"is_video":false,"link_flair_css_class":"post-recurring","link_flair_text":"WotD","locked":false,"media":null,"media_embed":{},"no_follow":false,"num_comments":5,"num_crossposts":0,"over_18":false,"parent_whitelist_status":"all_ads","permalink":"/r/Calligraphy/comments/7ueitb/word_of_the_day_january_31_2018_astringent/","pinned":false,"retrieved_on":1520467337,"score":11,"secure_media":null,"secure_media_embed":{},"selftext":"# Word of the day: Astringent\n\nSynonyms: Sullen, Bitter\n\n\n\nSpanish: Astringente, Acerbo, Acre\n\nGerman: Adstringens, Adstringierend, Bei\u00dfend\n\nGreek (Modern): \u0394\u03c1\u03b9\u03bc\u03cd\u03c2, \u03a3\u03c4\u03c5\u03c0\u03c4\u03b9\u03ba\u03cc\u03c2\n\n1: A substance which draws tissue together thus restricting the flow of blood.\n\n2: a substance which draws tissue together\n\n *^I ^am ^a ^bot, ^and ^this ^action ^was ^performed ^automatically. ^Please ^contact ^the ^moderators ^of ^this ^subreddit ^if ^you ^have ^any ^questions ^or ^concerns.* \n\n *^Want ^to ^suggest ^new ^words? ^PM ^/u/Maxindigo*","send_replies":true,"spoiler":false,"stickied":false,"subreddit":"Calligraphy","subreddit_id":"t5_2rkjt","subreddit_type":"public","suggested_sort":null,"thumbnail":"self","thumbnail_height":null,"thumbnail_width":null,"title":"Word of the Day - January 31, 2018 - Astringent","url":"https://www.reddit.com/r/Calligraphy/comments/7ueitb/word_of_the_day_january_31_2018_astringent/","whitelist_status":"all_ads"}
+{
+  "archived": false,
+  "author": "transcribersofreddit",
+  "author_flair_css_class": null,
+  "author_flair_text": "Official Bot",
+  "brand_safe": false,
+  "contest_mode": false,
+  "created_utc": 1517443200,
+  "distinguished": null,
+  "domain": "reddit.com",
+  "edited": false,
+  "gilded": 0,
+  "hidden": false,
+  "hide_score": false,
+  "id": "7ueit6",
+  "is_crosspostable": false,
+  "is_reddit_media_domain": false,
+  "is_self": false,
+  "is_video": false,
+  "link_flair_css_class": "unclaimed",
+  "link_flair_text": "Unclaimed",
+  "locked": false,
+  "media": null,
+  "media_embed": {},
+  "no_follow": true,
+  "num_comments": 1,
+  "num_crossposts": 0,
+  "over_18": false,
+  "parent_whitelist_status": null,
+  "permalink": "/r/TranscribersOfReddit/comments/7ueit6/toomeirlformeirl_image_toomeirlformeirl/",
+  "pinned": false,
+  "retrieved_on": 1520467337,
+  "score": 1,
+  "secure_media": null,
+  "secure_media_embed": {},
+  "selftext": "",
+  "send_replies": true,
+  "spoiler": false,
+  "stickied": false,
+  "subreddit": "TranscribersOfReddit",
+  "subreddit_id": "t5_3jqmx",
+  "subreddit_type": "public",
+  "suggested_sort": null,
+  "thumbnail": "default",
+  "thumbnail_height": 140,
+  "thumbnail_width": 140,
+  "title": "TooMeIrlForMeIrl | Image | \"TooMeIrlForMeIrl\"",
+  "url": "https://reddit.com/r/TooMeIrlForMeIrl/comments/7ueit3/toomeirlformeirl/",
+  "whitelist_status": null
+}
 ```
 
 As we already saw above, Dgraph's GraphQL+- engine can accept JSON data within mutations, so we just need to create a helper function that can efficiently extract this data and push it to a Dgraph mutation. However, as discussed these are rather large files, so we cannot simply load them into memory and try reading their content. The solution? We'll be using [Node Streams](https://nodejs.org/api/stream.html)!
@@ -679,17 +724,18 @@ A stream in Node is a rather abstract concept that is used throughout the standa
     yarn add event-stream && yarn add -D @types/event-stream
     ```
 
-    In this case, we'll be using `event-stream` to split our data by line and format it into JSON objects before we manipulate it with custom code.
+    In this case, we'll be using `event-stream` to split our data by line and format it into JSON objects before we manipulate it with custom code. We'll also be using [`cli-progress`]() to create a progress bar.
 
 2.  Next, open the `src/dgraph/DgraphAdapter.ts` file and add the following `mutateFromStream` method.
 
     ```ts
     import es from 'event-stream';
+    import * as CliProgress from 'cli-progress';
     // ...
     public static async mutateFromStream({
-      stream,
-      batchSize = 50,
-      limit = 150
+    stream,
+    batchSize = 50,
+    limit = 150
     }: {
       stream: ReadStream;
       batchSize?: number;
@@ -698,26 +744,34 @@ A stream in Node is a rather abstract concept that is used throughout the standa
       const adapter = new DgraphAdapter();
       let batch: any[] = [];
       let total = 0;
+      const bar = new CliProgress.Bar(
+        {
+          stopOnComplete: true,
+          format:
+            '{bar} {percentage}% | Elapsed: {duration_formatted} | ETA: {eta_formatted} | {value}/{total} records'
+        },
+        CliProgress.Presets.shades_classic
+      );
+      // Start progress bar with maximum of limit.
+      bar.start(limit, 0);
 
       const syncMutation = async (readStream: ReadStream, event?: string) => {
-        // Pause during async.
-        readStream.pause();
-        console.log(
-          `DgraphAdapter.mutateFromStream, event: ${event}, batch.length: ${
-            batch.length
-          }`
-        );
-        // Mutate batch
-        const response = await adapter.mutate({ request: batch });
-        console.log(
-          `DgraphAdapter.mutateFromStream, event: ${event}, response.length: ${
-            response.length
-          }`
-        );
-        // Reset batch.
-        batch = [];
-        // Resume after async.
-        readStream.resume();
+        try {
+          // Pause during async.
+          readStream.pause();
+          // Mutate batch
+          const response = await adapter.mutate({ request: batch });
+          // Reset batch.
+          batch = [];
+          // Update progress bar.
+          bar.update(total);
+          // Resume after async.
+          readStream.resume();
+        } catch (error) {
+          // Stop progress bar.
+          bar.stop();
+          console.log(error);
+        }
       };
 
       return new Promise((resolve, reject) => {
@@ -730,7 +784,7 @@ A stream in Node is a rather abstract concept that is used throughout the standa
             total++;
 
             if (total >= limit) {
-              // Close stream if total meets limit.
+              // Close stream if total exceeds limit.
               this.destroy();
             } else if (batch.length === batchSize) {
               // Synchronously mutate if batch length meets batchSize.
@@ -738,6 +792,8 @@ A stream in Node is a rather abstract concept that is used throughout the standa
             }
           })
           .on('error', (error: Error) => {
+            // Stop progress bar.
+            bar.stop();
             console.log(error);
             reject(error);
           })
@@ -746,6 +802,8 @@ A stream in Node is a rather abstract concept that is used throughout the standa
             if (batch.length > 0) {
               await syncMutation(this, 'close');
             }
+            // Stop progress bar.
+            bar.stop();
             resolve(`Stream closed, processed ${total} out of ${limit} records.`);
           });
       });
@@ -799,7 +857,7 @@ A stream in Node is a rather abstract concept that is used throughout the standa
     });
     ```
 
-    Here we're creating a `ReadStream` from the `2018-02-01` Reddit submissions data set and then generating an `options` object that contains our `stream` instance. We also specify the `batchSize`, `limit`, and `path` properties, all of which recieve default values using the `minimist` library. The `path` property is used to create the `ReadStream`, while the other arguments are passed to `DgraphAdapter.mutateFromStream()`.
+    Here we're creating a `ReadStream` from the `2018-02-01` Reddit submissions data set and then generating an `options` object that contains our `stream` instance. We also specify the `batchSize`, `limit`, and `path` properties, all of which receive default values using the `minimist` library. The `path` property is used to create the `ReadStream`, while the other arguments are passed to `DgraphAdapter.mutateFromStream()`.
 
 5.  Let's test it out by running `gulp db:generate:data` from the command line.
 
@@ -808,50 +866,32 @@ A stream in Node is a rather abstract concept that is used throughout the standa
     [21:47:07] Requiring external module ts-node/register
     [21:47:08] Using gulpfile D:\work\dgraph\projects\dgraph-reddit\gulpfile.ts
     [21:47:08] Starting 'db:generate:data'...
-    DgraphAdapter.mutateFromStream, event: data, batch.length: 250
-    DgraphAdapter.mutateFromStream, event: data, response.length: 1267
-    DgraphAdapter.mutateFromStream, event: data, batch.length: 250
-    DgraphAdapter.mutateFromStream, event: data, response.length: 1415
-    DgraphAdapter.mutateFromStream, event: data, batch.length: 250
-    DgraphAdapter.mutateFromStream, event: data, response.length: 1414
-    DgraphAdapter.mutateFromStream, event: close, batch.length: 250
-    DgraphAdapter.mutateFromStream, event: close, response.length: 1264
+    ████████████████████████████████████████ 100% | Elapsed: 3s | ETA: 0s | 5000/5000 records
     Stream closed, processed 1000 out of 1000 records.
     [21:47:11] Finished 'db:generate:data' after 3.42 s
     ```
 
-    The output should look something like the above. We included some extra logging messages for now just to confirm everything is working correctly, but so far it looks good. Our `batch.length` size is accurately using the default of `250`, which means our code is aggregating an `Array` of `250` objects read from the `data` stream event prior to performing a `DgraphAdapter.mutate()` call. The `response.length` after each batch is pushed shows the number of nodes that were generated from that batch. We can also see that we're correctly processing only the `limit` number of records (`1000`, by default) before the stream is destroyed and closed.
+    The output should look something like the above. During progression you should notice that the record count is properly increasing by the `batch.length` size of `250`, which means our code is aggregating an `Array` of `250` objects read from the `data` stream event prior to performing a `DgraphAdapter.mutate()` call. We can also see that we're correctly processing only the `limit` number of records (`1000`, by default) before the stream is destroyed and closed.
 
-6.  Let's also confirm that we can override the default `batchSize` and `limit` parameters by providing matching `--arguments` to the `gulp db:generate:data` command. Let's try a `batchSize` of `123` and a `limit` of `10000`
+6.  Let's also confirm that we can override the default `batchSize` and `limit` parameters by providing matching `--arguments` to the `gulp db:generate:data` command. Let's try a `batchSize` of `123` and a `limit` of `2000`
 
     ```bash
-    $ gulp db:generate:data  --batchSize 123 --limit 10000
+    $ gulp db:generate:data  --batchSize 123 --limit 2000
     [21:52:07] Requiring external module ts-node/register
     [21:52:08] Using gulpfile D:\work\dgraph\projects\dgraph-reddit\gulpfile.ts
     [21:52:08] Starting 'db:generate:data'...
-    DgraphAdapter.mutateFromStream, event: data, batch.length: 123
-    DgraphAdapter.mutateFromStream, event: data, response.length: 805
-    DgraphAdapter.mutateFromStream, event: data, batch.length: 123
-    DgraphAdapter.mutateFromStream, event: data, response.length: 666
-    DgraphAdapter.mutateFromStream, event: data, batch.length: 123
-    DgraphAdapter.mutateFromStream, event: data, response.length: 700
-    DgraphAdapter.mutateFromStream, event: data, batch.length: 123
-    DgraphAdapter.mutateFromStream, event: data, response.length: 729
-    DgraphAdapter.mutateFromStream, event: data, batch.length: 123
-    DgraphAdapter.mutateFromStream, event: data, response.length: 700
-    DgraphAdapter.mutateFromStream, event: close, batch.length: 37
-    DgraphAdapter.mutateFromStream, event: close, response.length: 174
-    Stream closed, processed 10000 out of 10000 records.
-    [21:52:42] Finished 'db:generate:data' after 34 s
+    ████████████████████████████████████████ 100% | Elapsed: 7s | ETA: 0s | 5000/5000 records
+    Stream closed, processed 2000 out of 2000 records.
+    [21:52:42] Finished 'db:generate:data' after 7.82 s
     ```
 
     Awesome, both our argument overrides are working as expected. The last thing to do is confirm that the data is showing up in Dgraph as expected.
 
-7.  Open up the Ratel UI (http://localhost:8000/?latest), navigate to **Console > Query** and run the following query.
+7.  Open up the Ratel UI (http://localhost:8000/?latest), navigate to **Console > Query** and run the following query. We're explicitly filtering out the, well, explicit content from the query below to ensure this is safe for work, but feel free to remove those filters throughout the tutorial if you want to ensure everything is as accurate as possible.
 
     ```js
     {
-      data(func: has(author), first: 10) {
+      data(func: has(author), first: 10) @filter(eq(over_18, false)) {
         uid
         expand(_all_) {
           uid
@@ -868,7 +908,7 @@ A stream in Node is a rather abstract concept that is used throughout the standa
 <!-- prettier-ignore-start -->
 {{< runnable >}}
 {
-  data(func: has(author), first: 10) {
+  data(func: has(author), first: 10) @filter(eq(over_18, false)) {
     uid
     expand(_all_) {
       uid
@@ -980,14 +1020,49 @@ Before we add a great deal of data we should take this opportunity to setup a re
 
     Since `DgraphAdapter.alterSchema()` returns a `Promise` we can use the [`Promise.all()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all) method and pass it a collection of promises. This ensures that the `db:schema:alter` task only completes after the database has been updated using both schema sets.
 
+4.  Now drop existing data and then update the schema with the `db:schema:alter` command.
+
+    ```bash
+    gulp db:drop
+    gulp db:schema:alter
+    ```
+
 ### Regenerate Full Data Set
 
-With our schema setup we can now add some significant data to the system that our Vue app can work with. The following commands will `drop` the Dgraph database and then add `10,000` submissions and `50,000` comments from the exported Reddit data sets.
+With our schema setup we can now add some significant data to the system that our Vue app can work with. The following commands will add `10,000` submissions and `50,000` comments from the exported Reddit data sets, but feel free to adjust the `limit` to suit your needs.
 
 ```bash
-gulp db:drop
 gulp db:generate:data --limit 5000 --path ./src/data/RS_2018-02-01 && gulp db:generate:data --limit 5000 --path ./src/data/RS_2018-02-02
 gulp db:generate:data --limit 25000 --path ./src/data/RC_2018-02-01 && gulp db:generate:data --limit 25000 --path ./src/data/RC_2018-02-02
+```
+
+This may take a couple minutes to complete, but once that's done you'll have a decently-sized data set to work with for the remainder of the tutorial.
+
+```bash
+[22:12:16] Requiring external module ts-node/register
+[22:12:18] Using gulpfile D:\work\dgraph\projects\dgraph-reddit\gulpfile.ts
+[22:12:18] Starting 'db:generate:data'...
+████████████████████████████████████████ 100% | Elapsed: 22s | ETA: 0s | 5000/5000 records
+Stream closed, processed 5000 out of 5000 records.
+[22:12:40] Finished 'db:generate:data' after 22 s
+[22:12:41] Requiring external module ts-node/register
+[22:12:42] Using gulpfile D:\work\dgraph\projects\dgraph-reddit\gulpfile.ts
+[22:12:42] Starting 'db:generate:data'...
+████████████████████████████████████████ 100% | Elapsed: 24s | ETA: 0s | 5000/5000 records
+Stream closed, processed 5000 out of 5000 records.
+[22:13:06] Finished 'db:generate:data' after 24 s
+[22:13:07] Requiring external module ts-node/register
+[22:13:08] Using gulpfile D:\work\dgraph\projects\dgraph-reddit\gulpfile.ts
+[22:13:08] Starting 'db:generate:data'...
+████████████████████████████████████████ 100% | Elapsed: 42s | ETA: 0s | 25000/25000 records
+Stream closed, processed 25000 out of 25000 records.
+[22:13:50] Finished 'db:generate:data' after 42 s
+[22:13:51] Requiring external module ts-node/register
+[22:13:53] Using gulpfile D:\work\dgraph\projects\dgraph-reddit\gulpfile.ts
+[22:13:53] Starting 'db:generate:data'...
+████████████████████████████████████████ 100% | Elapsed: 1m3s | ETA: 0s | 25000/25000 records
+Stream closed, processed 25000 out of 25000 records.
+[22:14:56] Finished 'db:generate:data' after 1.03 min
 ```
 
 ## Creating a Vue
@@ -1010,6 +1085,26 @@ yarn add https://github.com/foxbenjaminfox/vue-async-computed#types
 
 ```
 Copy `index.d.ts` to `src/@types`.
+```
+
+### Adding Vuetify
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- ... -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Material+Icons"
+    />
+  </head>
+  <!-- ... -->
+</html>
 ```
 
 ## Query Only Comments
@@ -1052,25 +1147,75 @@ Copy `index.d.ts` to `src/@types`.
 
 ![Post List Mockup](/images/PostList-mockup@2x.png)
 
-Add Vuetify via `Vue CLI`.`
+1.  Add the [Vuetify](https://vuetifyjs.com/en/) material design framework via `Vue CLI`.
 
-```bash
-vue add vuetify
-```
+    ```bash
+    vue add vuetify
+    ```
 
-Add FontAwesome to `public.index.html`.
+    If you get an error while trying to install the plugin with default settings due to large files in the `src/data` directory, try adding `src/data` to your `.gitignore`, then run the Vuetify installer again and select manual configuration using the following settings.
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <!-- -->
-    <link
-      rel="stylesheet"
-      href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
-      integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf"
-      crossorigin="anonymous"
-    />
-  </head>
-</html>
-```
+    ```
+    ? Choose a preset: Configure (advanced)
+    ? Use a pre-made template? (will replace App.vue and HelloWorld.vue) No
+    ? Use custom theme? No
+    ? Use custom properties (CSS variables)? No
+    ? Select icon font Material Icons
+    ? Use fonts as a dependency (for Electron or offline)? No
+    ? Use a-la-carte components? Yes
+    ? Select locale English
+    ```
+
+    This should allow the install to proceed as normal.
+
+2.  Edit the `src/plugins/vuetify.ts` file that is automatically added and change the line `import Vuetify from 'vuetify/lib';` to `import Vuetify from 'vuetify';`.
+
+    ```ts
+    import Vue from 'vue';
+    import Vuetify from 'vuetify';
+    import 'vuetify/src/stylus/app.styl';
+
+    Vue.use(Vuetify, {
+      iconfont: 'md'
+    });
+    ```
+
+    As of the time of writing there is currently a small bug with TypeScript and the Vuetify plugin installation when trying to access the direct `/lib` directory (types declarations cannot be found). The above change fixes that issue.
+
+### Handling Global Sass Variables
+
+1.  Create a `src/assets/css/variables.scss` file and add the following Sass variable.
+
+    ```scss
+    // Dgraph Color
+    $highlight-color: #fb5812;
+    ```
+
+    We'll use this file for global variables that we need access to throughout the app. However, in order for `scoped` CSS within a `.vue` file to have access to the global `variables.scss` file we need to modify the Webpack loader `css` settings so it'll import the file automatically.
+
+2.  Open `vue.config.js` and add the following `css: { ... }` property.
+
+    ```js
+    module.exports = {
+      // ...
+      css: {
+        loaderOptions: {
+          sass: {
+            data: `@import "~@/assets/css/variables.scss";`
+          }
+        }
+      }
+    };
+    ```
+
+3.  Now, back in `src/components/Post.vue` we can safely add a `$hightlight-color` reference within our CSS. In this case, we'll change the vote arrow `:hover` color to match.
+
+    ```scss
+    .arrow {
+      &:hover {
+        color: $highlight-color;
+      }
+    }
+    ```
+
+### Using Material Icons

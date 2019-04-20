@@ -1,0 +1,11 @@
+// Color
+$highlight-color: #c94111;
+$highlight-offset-color: #fba637;
+
+.highlight {
+  color: $highlight-color;
+
+  &:hover {
+    color: $highlight-offset-color;
+  }
+}

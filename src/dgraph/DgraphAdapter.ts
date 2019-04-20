@@ -7,6 +7,7 @@ import {
 } from 'dgraph-js-http';
 import { ReadStream } from 'fs';
 import es from 'event-stream';
+import * as CliProgress from 'cli-progress';
 
 export enum MutationTypes {
   DeleteJson,
@@ -35,28 +36,32 @@ export class DgraphAdapter {
     const adapter = new DgraphAdapter();
     let batch: any[] = [];
     let total = 0;
+    const bar = new CliProgress.Bar(
+      {
+        stopOnComplete: true,
+        format:
+          '{bar} {percentage}% | Elapsed: {duration_formatted} | ETA: {eta_formatted} | {value}/{total} records'
+      },
+      CliProgress.Presets.shades_classic
+    );
+    // Start progress bar with maximum of limit.
+    bar.start(limit, 0);
 
     const syncMutation = async (readStream: ReadStream, event?: string) => {
       try {
         // Pause during async.
         readStream.pause();
-        console.log(
-          `DgraphAdapter.mutateFromStream, event: ${event}, batch.length: ${
-            batch.length
-          }`
-        );
         // Mutate batch
         const response = await adapter.mutate({ request: batch });
-        console.log(
-          `DgraphAdapter.mutateFromStream, event: ${event}, response.length: ${
-            response.length
-          }`
-        );
         // Reset batch.
         batch = [];
+        // Update progress bar.
+        bar.update(total);
         // Resume after async.
         readStream.resume();
       } catch (error) {
+        // Stop progress bar.
+        bar.stop();
         console.log(error);
       }
     };
@@ -71,7 +76,7 @@ export class DgraphAdapter {
           total++;
 
           if (total >= limit) {
-            // Close stream if total meets limit.
+            // Close stream if total exceeds limit.
             this.destroy();
           } else if (batch.length === batchSize) {
             // Synchronously mutate if batch length meets batchSize.
@@ -79,6 +84,8 @@ export class DgraphAdapter {
           }
         })
         .on('error', (error: Error) => {
+          // Stop progress bar.
+          bar.stop();
           console.log(error);
           reject(error);
         })
@@ -87,6 +94,8 @@ export class DgraphAdapter {
           if (batch.length > 0) {
             await syncMutation(this, 'close');
           }
+          // Stop progress bar.
+          bar.stop();
           resolve(`Stream closed, processed ${total} out of ${limit} records.`);
         });
     });

@@ -8,5 +8,12 @@ module.exports = {
         options.configFile = 'tsconfig.vue.json';
         return options;
       });
+  },
+  css: {
+    loaderOptions: {
+      sass: {
+        data: `@import "~@/assets/css/variables.scss";`
+      }
+    }
   }
 };

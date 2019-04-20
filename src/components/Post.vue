@@ -1,9 +1,9 @@
 <template>
   <div class="post" :id="id">
     <div class="votes">
-      <i class="arrow up fas fa-arrow-up"></i>
+      <i class="arrow up material-icons highlight">arrow_upward</i>
       <span class="score">1234</span>
-      <i class="arrow down fas fa-arrow-down"></i>
+      <i class="arrow down material-icons">arrow_downward</i>
     </div>
     <a class="thumbnail" href="#">
       <img src="https://loremflickr.com/70/70" alt="" />
@@ -18,8 +18,9 @@
         <span class="domain">(<a href="/r/AskReddit">self.AskReddit</a>)</span>
       </p>
       <p class="tagline">
-        submitted 5 hours ago by <a href="/user/JustSomeGuy">JustSomeGuy</a> to
-        <a href="/r/AskReddit">r/AskReddit</a>
+        submitted 5 hours ago by
+        <a class="highlight" href="/user/JustSomeGuy">JustSomeGuy</a> to
+        <a class="highlight" href="/r/AskReddit">r/AskReddit</a>
       </p>
       <ul class="buttons">
         <li class="comment">75 comments</li>
