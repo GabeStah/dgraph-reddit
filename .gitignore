@@ -24,7 +24,7 @@ yarn-error.log*
 src/data
 
 # Hugo Themes
-tutorial/themes
+hugo/themes
 
 # Computed Variables
 src/assets/css/vuetify-computed.css
