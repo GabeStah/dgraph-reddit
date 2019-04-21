@@ -1,4 +1,4 @@
-baseURL = "http://localhost:1313/"
+baseURL = "https://dgraph-reddit-tutorial.pingpub.dev"
 languageCode = "en-us"
 title = "Dgraph Reddit Tutorial"
 author = "Gabe Wyatt"
