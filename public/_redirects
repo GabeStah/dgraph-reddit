@@ -1,2 +1,2 @@
 https://dgraph-reddit.netlify.com/* https://dgraph-reddit.pingpub.dev/:splat 301!
-https://added-postlist--dgraph-reddit.pingpub.dev/* https://added-postlist--dgraph-reddit.netlify.com/:splat 301!
+https://added-postlist--dgraph-reddit.netlify.com/* https://added-postlist.dgraph-reddit.pingpub.dev/:splat 301!
