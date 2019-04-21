@@ -1,9 +1,9 @@
 <template>
   <v-layout row wrap class="post" my-2>
     <v-flex class="votes" xs1 px-1 mx-1>
-      <v-icon class="arrow up">arrow_upward</v-icon>
+      <v-icon class="arrow up accentuated">arrow_upward</v-icon>
       <span class="score">1234</span>
-      <v-icon class="arrow down">arrow_downward</v-icon>
+      <v-icon class="arrow down accentuated">arrow_downward</v-icon>
     </v-flex>
     <v-flex class="thumbnail" xs1 px-1 mx-1>
       <a href="#">
@@ -78,12 +78,6 @@ export default class Post extends Vue {
 
     * {
       display: block;
-    }
-
-    .arrow {
-      &:hover {
-        color: var(--v-primary-base);
-      }
     }
   }
 
