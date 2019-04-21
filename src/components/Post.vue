@@ -1,38 +1,64 @@
 <template>
-  <div class="post" :id="id">
-    <div class="votes">
-      <i class="arrow up material-icons highlight">arrow_upward</i>
+  <v-layout row wrap class="post" my-2>
+    <v-flex class="votes" xs1 px-1 mx-1>
+      <v-icon class="arrow up">arrow_upward</v-icon>
       <span class="score">1234</span>
-      <i class="arrow down material-icons">arrow_downward</i>
-    </div>
-    <a class="thumbnail" href="#">
-      <img src="https://loremflickr.com/70/70" alt="" />
-    </a>
-    <div class="content">
-      <p class="title">
-        <a href="#"
+      <v-icon class="arrow down">arrow_downward</v-icon>
+    </v-flex>
+    <v-flex class="thumbnail" xs1 px-1 mx-1>
+      <a href="#">
+        <v-img
+          :src="`https://lorempixel.com/70/70`"
+          :lazy-src="`https://dummyimage.com/70x70/f5f5f5/f96515&text=D`"
+          aspect-ratio="1"
+          height="70"
+          width="70"
+        />
+      </a>
+    </v-flex>
+    <v-flex class="content" xs10 px-1 mx-1>
+      <span class="title">
+        <a href="#" class="text--primary"
           >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent eu
           maximus sem. Aliquam erat volutpat. Aliquam maximus efficitur ligula
           eu vestibulum.</a
         >
-        <span class="domain">(<a href="/r/AskReddit">self.AskReddit</a>)</span>
-      </p>
-      <p class="tagline">
+        <span class="domain text--secondary caption ml-1 font-weight-bold"
+          >(<a href="/r/AskReddit" class="text--secondary accentuated"
+            >self.AskReddit</a
+          >)</span
+        >
+      </span>
+      <span class="tagline caption">
         submitted 5 hours ago by
-        <a class="highlight" href="/user/JustSomeGuy">JustSomeGuy</a> to
-        <a class="highlight" href="/r/AskReddit">r/AskReddit</a>
-      </p>
-      <ul class="buttons">
-        <li class="comment">75 comments</li>
-        <li class="share">share</li>
-        <li class="save">save</li>
-        <li class="toggle">hide</li>
-        <li class="award">give award</li>
-        <li class="report">report</li>
-        <li class="crosspost">crosspost</li>
+        <a class="accentuated" href="/user/JustSomeGuy">JustSomeGuy</a> to
+        <a class="accentuated" href="/r/AskReddit">r/AskReddit</a>
+      </span>
+      <ul class="buttons font-weight-medium">
+        <li class="comment">
+          <a href="#" class="text--secondary accentuated">75 comments</a>
+        </li>
+        <li class="share">
+          <a href="#" class="text--secondary accentuated">share</a>
+        </li>
+        <li class="save">
+          <a href="#" class="text--secondary accentuated">save</a>
+        </li>
+        <li class="toggle">
+          <a href="#" class="text--secondary accentuated">hide</a>
+        </li>
+        <li class="award">
+          <a href="#" class="text--secondary accentuated">give award</a>
+        </li>
+        <li class="report">
+          <a href="#" class="text--secondary accentuated">report</a>
+        </li>
+        <li class="crosspost">
+          <a href="#" class="text--secondary accentuated">crosspost</a>
+        </li>
       </ul>
-    </div>
-  </div>
+    </v-flex>
+  </v-layout>
 </template>
 
 <script lang="ts">
@@ -46,38 +72,28 @@ export default class Post extends Vue {
 
 <style scoped lang="scss">
 .post {
-  margin: 0 0 0.5em 0;
-  padding-left: 0.35em;
-  display: grid;
-  grid-auto-rows: minmax(100px, auto);
-  grid-gap: 10px;
-  grid-template-columns: 50px 70px 1fr;
-
   .votes {
-    grid-column: 1;
-    grid-row: 1;
+    max-width: 40px;
+    text-align: center;
 
     * {
       display: block;
     }
+
+    .arrow {
+      &:hover {
+        color: var(--v-primary-base);
+      }
+    }
   }
 
   .thumbnail {
-    grid-column: 2;
-    grid-row: 1;
+    max-width: 70px;
   }
 
   .content {
-    grid-column: 3;
-    grid-row: 1;
-
-    .title {
-      font-weight: bold;
-
-      a {
-        text-decoration: none;
-        color: rgb(61, 59, 61);
-      }
+    a {
+      text-decoration: none;
     }
 
     .buttons {
@@ -90,6 +106,11 @@ export default class Post extends Vue {
         line-height: 1.5em;
         padding-right: 0.33em;
       }
+    }
+
+    .title {
+      display: block;
+      font-weight: bold;
     }
   }
 }

@@ -5,10 +5,16 @@ import colors from 'vuetify/es5/util/colors';
 
 Vue.use(Vuetify, {
   iconfont: 'md',
+  options: {
+    customProperties: true
+  },
   theme: {
-    primary: colors.purple,
-    secondary: colors.grey.darken1,
-    accent: colors.shades.black,
-    error: colors.red.accent3
+    primary: '#f96315',
+    secondary: '#29b6f6',
+    accent: '#ffc046',
+    info: '#73e8ff',
+    warning: '#c17900',
+    error: '#d32f2f',
+    success: '#43a047'
   }
 });

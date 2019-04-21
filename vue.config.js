@@ -12,7 +12,7 @@ module.exports = {
   css: {
     loaderOptions: {
       sass: {
-        data: `@import "~@/assets/css/variables.scss";`
+        data: `@import "~@/assets/css/main.scss";`
       }
     }
   }

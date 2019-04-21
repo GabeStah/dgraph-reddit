@@ -1184,7 +1184,7 @@ Copy `index.d.ts` to `src/@types`.
 
 ### Handling Global Sass Variables
 
-1.  Create a `src/assets/css/variables.scss` file and add the following Sass variable.
+1.  Create a `src/assets/css/main.scss` file and add the following Sass variable.
 
     ```scss
     // Dgraph Color
@@ -1219,3 +1219,8 @@ Copy `index.d.ts` to `src/@types`.
     ```
 
 ### Using Material Icons
+
+### Post List Layout
+
+![Post List Initial Layout](/images/PostList-initial.png)
+
