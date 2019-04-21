@@ -1,0 +1,3 @@
+[submodule "hugo-dgraph-theme"]
+	path = hugo/themes/hugo-dgraph-theme
+	url = https://github.com/GabeStah/dgraph-reddit
