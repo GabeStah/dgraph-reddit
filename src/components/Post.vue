@@ -1,15 +1,15 @@
 <template>
-  <v-layout row wrap class="post" my-2>
+  <v-layout class="post" row wrap my-2>
     <v-flex class="votes" xs1 px-1 mx-1>
       <v-icon class="arrow up accentuated">arrow_upward</v-icon>
-      <span class="score">1234</span>
+      <span class="score">{{ score }}</span>
       <v-icon class="arrow down accentuated">arrow_downward</v-icon>
     </v-flex>
     <v-flex class="thumbnail" xs1 px-1 mx-1>
-      <a href="#">
+      <a :href="fullUrl">
         <v-img
-          :src="`https://lorempixel.com/70/70`"
-          :lazy-src="`https://dummyimage.com/70x70/f5f5f5/f96515&text=D`"
+          :src="thumbnailUrl"
+          :lazy-src="thumbnailUrl"
           aspect-ratio="1"
           height="70"
           width="70"
@@ -18,25 +18,28 @@
     </v-flex>
     <v-flex class="content" xs10 px-1 mx-1>
       <span class="title">
-        <a href="#" class="text--primary"
-          >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent eu
-          maximus sem. Aliquam erat volutpat. Aliquam maximus efficitur ligula
-          eu vestibulum.</a
-        >
+        <a :href="fullUrl" class="text--primary">{{ title }}</a>
         <span class="domain text--secondary caption ml-1 font-weight-bold"
-          >(<a href="/r/AskReddit" class="text--secondary accentuated"
-            >self.AskReddit</a
+          >(<a :href="domainUrl" class="text--secondary accentuated">{{
+            domain
+          }}</a
           >)</span
         >
       </span>
       <span class="tagline caption">
-        submitted 5 hours ago by
-        <a class="accentuated" href="/user/JustSomeGuy">JustSomeGuy</a> to
-        <a class="accentuated" href="/r/AskReddit">r/AskReddit</a>
+        submitted {{ created_utc | moment('from') }} by
+        <a class="accentuated" :href="authorUrl" v-if="hasAuthor">{{
+          author
+        }}</a>
+        <span v-else>{{ author }}</span>
+        to
+        <a class="accentuated" :href="subredditUrl">r/{{ subreddit }}</a>
       </span>
       <ul class="buttons font-weight-medium">
         <li class="comment">
-          <a href="#" class="text--secondary accentuated">75 comments</a>
+          <a :href="permalink" class="text--secondary accentuated"
+            >{{ num_comments }} comments</a
+          >
         </li>
         <li class="share">
           <a href="#" class="text--secondary accentuated">share</a>
@@ -66,7 +69,54 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
 export default class Post extends Vue {
-  @Prop() private id!: string;
+  @Prop(String) private id!: string;
+  @Prop(String) private author!: string;
+  @Prop(String) private created_utc!: Date;
+  @Prop(String) private domain!: string;
+  @Prop(Boolean) private is_self!: boolean;
+  @Prop(Number) private num_comments!: number;
+  @Prop(String) private permalink!: string;
+  @Prop(Number) private score!: number;
+  @Prop(String) private subreddit!: string;
+  @Prop(String) private thumbnail!: string;
+  @Prop({ default: 70 }) private thumbnail_height!: number;
+  @Prop({ default: 70 }) private thumbnail_width!: number;
+  @Prop(String) private title!: string;
+  @Prop(String) private url!: string;
+
+  get authorUrl() {
+    return `/user/${this.author}`;
+  }
+
+  get domainUrl() {
+    if (this.is_self) {
+      return this.subredditUrl;
+    } else {
+      return `/domain/${this.domain}`;
+    }
+  }
+
+  get fullUrl() {
+    return this.is_self ? this.permalink : this.url;
+  }
+
+  get hasAuthor() {
+    return this.author !== '[deleted]';
+  }
+
+  get subredditUrl() {
+    return `/r/${this.subreddit}`;
+  }
+
+  get thumbnailUrl() {
+    if (this.thumbnail === 'self') {
+      return require('../assets/images/thumbnail-self.png');
+    } else if (this.thumbnail === 'default') {
+      return require('../assets/images/thumbnail-default.png');
+    } else {
+      return this.thumbnail;
+    }
+  }
 }
 </script>
 

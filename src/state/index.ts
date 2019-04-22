@@ -1,3 +1,2 @@
-export * from '@/state/actions';
-export * from '@/state/mutations';
+export * from '@/state/types';
 export * from '@/state/store';

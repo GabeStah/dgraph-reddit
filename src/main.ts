@@ -6,8 +6,12 @@ import Vuex from 'vuex';
 import App from './App.vue';
 import router from './router';
 import { store } from '@/state/store';
+// @ts-ignore
+import VueMoment from 'vue-moment';
 
 Vue.config.productionTip = false;
+
+Vue.use(VueMoment);
 
 new Vue({
   router,
