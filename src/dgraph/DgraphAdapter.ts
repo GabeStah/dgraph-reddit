@@ -216,11 +216,19 @@ export class DgraphAdapter {
    * @param query
    * @param vars
    */
-  public async query<T>(query: string, vars?: any): Promise<any> {
+  public async query<T>(query: string, vars?: object): Promise<any> {
     const transaction = this.client.newTxn();
     let result;
     try {
-      // Check for optional vars.
+      // Reduce optional vars to string values only.
+      // See: https://github.com/dgraph-io/dgraph-js-http/blob/master/src/txn.ts#L69-L71
+      // See: https://github.com/dgraph-io/dgraph-js-http/blob/master/tests/txn.spec.ts#L47-L56
+      vars = vars
+        ? Object.entries(vars).reduce((accumulator: any, value) => {
+            accumulator[value[0]] = value[1].toString();
+            return accumulator;
+          }, {})
+        : vars;
       const response: Response = vars
         ? await transaction.queryWithVars(query, vars)
         : await transaction.query(query);

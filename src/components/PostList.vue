@@ -20,8 +20,11 @@ export default class PostList extends Vue {
   }
 
   public async created() {
-    // Get all posts.
-    await this.$store.dispatch({ type: Types.Action.Post.GetAll });
+    // Get post list.
+    await this.$store.dispatch(Types.Action.Post.Get.Paginated, {
+      first: 100,
+      offset: 0
+    });
   }
 }
 </script>

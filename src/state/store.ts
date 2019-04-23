@@ -7,7 +7,7 @@ import { State } from '@/state/state';
 Vue.use(Vuex);
 
 export const store = new Vuex.Store({
-  state: State,
+  actions: Actions,
   mutations: Mutations,
-  actions: Actions
+  state: State
 });

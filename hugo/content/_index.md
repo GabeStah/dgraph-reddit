@@ -550,11 +550,17 @@ To perform a Dgraph query we once again need to create a new transaction and pas
 1.  Open `src/dgraph/DgraphAdapter.ts` and add the following `query` method.
 
     ```ts
-    public async query<T>(query: string, vars?: any): Promise<any> {
+    public async query<T>(query: string, vars?: object): Promise<any> {
       const transaction = this.client.newTxn();
       let result;
       try {
-        // Check for optional vars.
+        // Reduce optional vars to string values only.
+        vars = vars
+          ? Object.entries(vars).reduce((accumulator: any, value) => {
+              accumulator[value[0]] = value[1].toString();
+              return accumulator;
+            }, {})
+          : vars;
         const response: Response = vars
           ? await transaction.queryWithVars(query, vars)
           : await transaction.query(query);
@@ -1454,6 +1460,43 @@ As mentioned before, here is where we've added the `<v-container>` element that 
 
 The script is fairly simple and similar to what we saw in the `Post` component, but we're passing an object to the `@Component` directive and specifying that our `components` property contains the `Post` component.  Now all we have to do is get our app to render the `PostList` component and we'll be in business!
 
+#### Handling Global Sass Variables
+
+We need a convenient way to inject custom CSS throughout the app, which we can do by modifying the CSS Webpack loader.
+
+1.  Create a `src/assets/css/main.scss` file and add the following Sass.
+
+    ```scss
+    .accentuated {
+      &:hover {
+        color: var(--v-accent-base) !important;
+      }
+    }
+    ```
+
+    Notice that we're using the `--v-accent-base` variable, which is generated automatically because we passed `options.customProperties` to the Vuetify declaration in [Configuring Vuetify](#configuring-vuetify).
+
+    We'll use this file for global CSS that we need access to throughout the app. However, in order for `scoped` CSS within a `.vue` file to have access to the global `src/assets/css/main.scss` file we need to modify the Webpack loader `css` settings so it'll import the file automatically.
+
+2.  Open `vue.config.js` and add the following `css: { ... }` property.
+
+    ```js
+    module.exports = {
+      // ...
+      css: {
+        loaderOptions: {
+          sass: {
+            data: `@import "~@/assets/css/main.scss";`
+          }
+        }
+      }
+    };
+    ```
+
+    Now in the `src/components/Post.vue` component where we use the `accentuated` class we'll see `:hover` effects using the accent base color specified in our Vuetify theme.
+
+    {{% notice "warning" %}} Unfortunately, Vuetify defaults to using the `!important` flag for a number of its generated CSS classes.  Therefore, if you notice custom CSS changes aren't taking affect you may have to resort to adding the `!important` flag to your own CSS rules intended to take precedence. {{% /notice %}}
+
 ### Updating the App and Home Components
 
 The default Vue layout looks neat and all, but we obviously need to get rid of that starter stuff so our app functions like we want.
@@ -1529,68 +1572,409 @@ Check out what the app currently looks like at the URL below.
 
 - [Added PostList Branch Snapshot](https://added-postlist.dgraph-reddit.pingpub.dev/)
 
-### Adding vue-moment Library
+### Querying Dgraph
 
-```bash
-yarn add vue-moment
-```
+Now that our `PostList` component is configured it's time to populate it with actual data from Dgraph.
 
-### Handling Global Sass Variables
+#### Managing State With the Vuex Library
 
-1.  Create a `src/assets/css/main.scss` file and add the following Sass variable.
+As is common practice with Vue applications we'll be using the [`vuex` library](https://vuex.vuejs.org/) which provides common statement management patterns similar to those found in React/Redux and the like.  Similar to Redux, Vuex uses a combination of **actions** and **mutations** to perform one-way transactions.  An action never _modifies_ the state and, instead, merely provides instruction for a mutation to perform actual state changes.
 
-    ```scss
-    // Dgraph Color
-    $highlight-color: #fb5812;
+{{% notice "tip" %}} This tutorial will cover the basics of Vuex and its state management pattern, but you're encouraged to check out the [official documentation](https://vuex.vuejs.org/) for a lot more information about what Vuex can do. {{% /notice %}}
+
+1.  Vuex will already be installed if you used the same configuration found in [Create a Vue CLI Project](#create-a-vue-cli-project).  However, if not, feel free to add it manually via npm or yarn.
+
+    ```bash
+    yarn add vuex
     ```
 
-    We'll use this file for global variables that we need access to throughout the app. However, in order for `scoped` CSS within a `.vue` file to have access to the global `variables.scss` file we need to modify the Webpack loader `css` settings so it'll import the file automatically.
+2.  We're going to store everything about our state management in the `src/state` directory, so create that now if needed.
 
-2.  Open `vue.config.js` and add the following `css: { ... }` property.
+    ```bash
+    mkdir state
+    ```
 
-    ```js
-    module.exports = {
-      // ...
-      css: {
-        loaderOptions: {
-          sass: {
-            data: `@import "~@/assets/css/variables.scss";`
+3.  Add the following `import` to your `src/main.ts` file.
+
+    ```ts
+    import { store } from '@/state/store';
+    ```
+
+    This file will be the entry point for all Vuex store management.
+
+4.  Create the following files within the `src/state` directory.
+
+    - `actions.ts`
+    - `index.ts`
+    - `mutations.ts`
+    - `state.ts`
+    - `store.ts`
+    - `types.ts`
+
+5.  Open `src/state/store.ts` and add the following code to it.
+
+    ```ts
+    import Vuex from 'vuex';
+    import Vue from 'vue';
+    import { Actions } from '@/state/actions';
+    import { Mutations } from '@/state/mutations';
+    import { State } from '@/state/state';
+
+    Vue.use(Vuex);
+
+    export const store = new Vuex.Store({
+      actions: Actions,
+      mutations: Mutations,
+      state: State
+    });
+    ```
+
+    This file instantiates a new `Vuex.Store` instance and sets the three critical properties to exported values that we'll define in a moment.
+
+6.  Open the `src/state/types.ts` file and paste the following into it.
+
+    ```ts
+    export const Types = {
+      Action: {
+        Post: {
+          Get: {
+            Paginated: 'Post.Get.Paginated'
+          }
+        }
+      },
+      Mutation: {
+        Post: {
+          Set: {
+            Paginated: 'Post.Set.Paginated'
           }
         }
       }
     };
     ```
 
-3.  Now, back in `src/components/Post.vue` we can safely add a `$hightlight-color` reference within our CSS. In this case, we'll change the vote arrow `:hover` color to match.
+    Vuex expects a given **action** or **mutation** to be defined by a unique `string` value key.  However, it is useful to use enumerations or other static options to define these keys so you don't need to manually remember and enter the names of the actions or mutations you're performing.  That's what the `types.ts` file above accomplishes.  It will allow us to reference potentially complex action or mutation names through values the editor will verify.
 
-    ```scss
-    .arrow {
-      &:hover {
-        color: $highlight-color;
+7.  Open `src/state/actions.ts` and add the following code.
+
+    ```ts
+    import { Types } from '@/state/types';
+    import { DgraphAdapter } from '@/dgraph/DgraphAdapter';
+
+    export const Actions = {
+      async [Types.Action.Post.Get.Paginated](
+        { commit }: { commit: any },
+        { first = 50, offset = 0 }: { first?: number; offset?: number }
+      ) {
+        const { data } = await new DgraphAdapter().query(
+          `query posts($first: int, $offset: int) {
+              data(func: has(domain), first: $first, offset: $offset)
+                @filter((not has(crosspost_parent)) and eq(over_18, false)) {
+                uid
+                expand(_all_) {
+                  uid
+                  expand(_all_)
+                }
+              }
+            }`,
+          { $first: first, $offset: offset }
+        );
+
+        commit(Types.Mutation.Post.Set.Paginated, { posts: data });
       }
-    }
+    };
     ```
 
+    Here is where we're defining the actual actions that we want to be able to dispatch.  The `Actions` object is just a collection of functions and we're naming them using the pre-defined `Types` found in the `src/state/types.ts` file.  In this case, we've defined an `async` action named the value of `Types.Action.Post.Get.Paginated`.
 
+    Vuex [actions](https://vuex.vuejs.org/guide/actions.html) pass a `context` parameter which allows us to access the state (`context.state`) or commit a mutation (`context.commit`).  Here, we only need access to the `commit` function, so we're destructuring it in the parameter definition (which is a common pattern when using Vuex).  We're also accepting a second set of custom arguments which we'll use to adjust the logic of the action.  Remember, actions can be asynchronous but _cannot_ modify the state, but should just commit a mutation informing the state of a potential change.
 
-## Creating a Vue
+    This GraphQL+- query we're performing defines two [GraphQL Variables](https://docs.dgraph.io/query-language/#graphql-variables) (`$first` and `$offset`), which allows us to pass arguments to Dgraph to dynamically modify the query.  Both `first` and `offset` filters are part of the built-in [pagination](https://docs.dgraph.io/query-language/#pagination) options.  Thus, the default values of `50` and `0`, respectively, will return the first `50` posts.  The extra `@filter` directives used here are just to narrow the search down so we don't get any crossposts, nor anything that might be NSFW.
 
+    If you have Dgraph running locally you can test that query below.
 
-### Vuex Store Library
+    <!-- prettier-ignore-start -->
+    {{< runnable >}}
+    query posts($first: int, $offset: int) {
+      data(func: has(domain), first: 50, offset: 0)
+        @filter((not has(crosspost_parent)) and eq(over_18, false)) {
+        uid
+        expand(_all_) {
+          uid
+          expand(_all_)
+        }
+      }
+    }
+    {{< /runnable >}}
+    <!-- prettier-ignore-end -->
 
-```bash
-yarn add vuex
-```
+    As you may recall from [Querying Dgraph](#querying-dgraph) the call to `DgraphAdapter().query()` lets us pass optional arguments, and if they exist it will invoke the `txn.queryWithVars()` method from the `dgraph-js-http` library.
 
-```ts
-// src/main.ts
-import Vuex from 'vuex';
-Vue.use(Vuex);
-```
+    Once the result of our query has returned we finish by calling the `commit()` method to invoke the appropriate mutation.  Since the action name was `Post.Get.Paginated` to invoke a retrieval of posts that we pass as the payload argument to our mutation, the mutation we'll commit is `Post.Set.Paginated`.  We could name these anything we want and may want to change them in the future, but this seems like an appropriate name for a mutation that _changes_ the paginated post list.
 
-- Delete the pre-build `src/store.ts` file.
+8.  Speaking of mutations, open `src/state/mutations.ts` and paste the following into it.
 
+    ```ts
+    import { Types } from '@/state/types';
 
+    export const Mutations = {
+      [Types.Mutation.Post.Set.Paginated](state: any, { posts }: { posts: any[] }) {
+        state.posts = posts;
+      }
+    };
+    ```
+
+    As with the `Actions` object exported from `src/state/actions.ts`, the `Mutations` object is a collection of mutation methods.  The first parameter provided by Vuex is the current state, which is required and will be used to update or _mutate_ the state within the handler function.  We've also opted to pass an optional second argument that contains custom data used to process this mutation.  Here we're destructuring the `posts` property that was passed via the `commit()` method in our action, and setting the `state.posts` value to it.
+
+9.  The final step is to open `src/state/state.ts` and set the _initial_ state values for any state properties we'll be using.  In this case, we just have the `posts` property used above.
+
+    ```ts
+    export const State = {
+      posts: []
+    };
+    ```
+
+### Using State in the PostList Component
+
+Now that our state is configured and we can extract some paginated post data we need to add that functionality to our `src/components/PostList.vue` component.
+
+1.  Open `src/components/PostList.vue` and add the following `getPosts()` computed property and `created()` lifecycle method to the `PostList` class.  Don't forget the new `{ Types }` `import` as well.
+
+    ```ts
+    <script lang="ts">
+    import { Component, Prop, Vue } from 'vue-property-decorator';
+    import Post from '@/components/Post.vue';
+    import { Types } from '@/state';
+
+    @Component({
+      components: { Post }
+    })
+    export default class PostList extends Vue {
+      @Prop() private posts!: Post;
+
+      get getPosts() {
+        return this.$store.state.posts;
+      }
+
+      public async created() {
+        // Get post list.
+        await this.$store.dispatch(Types.Action.Post.Get.Paginated, {
+          first: 100,
+          offset: 0
+        });
+      }
+    }
+    </script>
+    ```
+
+    Vue has a number of component [lifecycle hooks](https://vuejs.org/v2/guide/instance.html#Instance-Lifecycle-Hooks), one of which is `created`.  The [`vue-class-component`](https://github.com/vuejs/vue-class-component) library lets us add run code during these lifecycle hooks by declaring class methods with the matching names and passing functions that should be executed during those hooks.  Thus, the `public async create()` method fires after the `PostList` component instance is created.  In it we await the result dispatching the `Post.Get.Paginated` action with extra optional arguments.  As we saw above, this will retrieve the data from Dgraph and then commit a mutation to update the state.
+
+    The `getPosts` getter is a _computed_ property, which means that Vue will intelligently evaluate the value of this property and dynamically re-render any components that rely on this property when the value changes.  Therefore, when the `state.posts` property changes, the value of the `getPosts` property is also updated.
+
+2.  To make use of `getPosts` let's update the `PostList.vue` HTML section as seen below.
+
+    ```html
+    <template>
+      <v-container grid-list-xs>
+        <Post v-for="post in getPosts" :key="post.id" v-bind="post"></Post>
+      </v-container>
+    </template>
+    ```
+
+    Vue provides a number of helper directives which are HTML attributes that begin with `v-`.
+
+    - [`v-for`](https://vuejs.org/v2/guide/list.html) - Loops over a collection.  We used this before to loop over a collection of numbers for dummy data, but here we're using it to iterate over the collection returned by the `getPosts` computed property seen above.
+    - [`v-bind`](https://vuejs.org/v2/api/#v-bind) - Dynamically binds an attribute to a value.  Typically this is written in the form of `v-bind:attr-name="value"`, but if we exclude the attribute name then Vue will automatically pass (i.e. `bind`) every property of the object in question to the component.
+    - `:key` - `v-bind` also has a shorthand syntax that lets us avoid typing the `v-bind` prefix.  By using just the colon followed by the attribute we can replicate a binding, so here we're binding the `key` attribute to the value of `post.id`.
+
+The `PostList` component is updated and is properly passing data to the `Post` instances it creates, but we need to update the `Post` component to actually display that data.
+
+### Binding Data in the Post Component
+
+1.  Open `src/components/Post.vue` and change the `<script>` section to the following.
+
+    ```ts
+    <script lang="ts">
+    import { Component, Prop, Vue } from 'vue-property-decorator';
+
+    @Component
+    export default class Post extends Vue {
+      @Prop(String) private id!: string;
+      @Prop(String) private author!: string;
+      @Prop(String) private created_utc!: Date;
+      @Prop(String) private domain!: string;
+      @Prop(Boolean) private is_self!: boolean;
+      @Prop(Number) private num_comments!: number;
+      @Prop(String) private permalink!: string;
+      @Prop(Number) private score!: number;
+      @Prop(String) private subreddit!: string;
+      @Prop(String) private thumbnail!: string;
+      @Prop({ default: 70 }) private thumbnail_height!: number;
+      @Prop({ default: 70 }) private thumbnail_width!: number;
+      @Prop(String) private title!: string;
+      @Prop(String) private url!: string;
+
+      get authorUrl() {
+        return `/user/${this.author}`;
+      }
+
+      get domainUrl() {
+        if (this.is_self) {
+          return this.subredditUrl;
+        } else {
+          return `/domain/${this.domain}`;
+        }
+      }
+
+      get fullUrl() {
+        return this.is_self ? this.permalink : this.url;
+      }
+
+      get hasAuthor() {
+        return this.author !== '[deleted]';
+      }
+
+      get subredditUrl() {
+        return `/r/${this.subreddit}`;
+      }
+
+      get thumbnailUrl() {
+        if (this.thumbnail === 'self') {
+          return require('../assets/images/thumbnail-self.png');
+        } else if (this.thumbnail === 'default') {
+          return require('../assets/images/thumbnail-default.png');
+        } else {
+          return this.thumbnail;
+        }
+      }
+    }
+    </script>
+    ```
+
+    This may look a bit overwhelming at first, but really we've just added two types of data to the `Post` component: properties and computed properties.  Let's start with the properties list.
+
+    ```ts
+    @Prop(String) private id!: string;
+    @Prop(String) private author!: string;
+    @Prop(String) private created_utc!: Date;
+    @Prop(String) private domain!: string;
+    @Prop(Boolean) private is_self!: boolean;
+    @Prop(Number) private num_comments!: number;
+    @Prop(String) private permalink!: string;
+    @Prop(Number) private score!: number;
+    @Prop(String) private subreddit!: string;
+    @Prop(String) private thumbnail!: string;
+    @Prop({ default: 70 }) private thumbnail_height!: number;
+    @Prop({ default: 70 }) private thumbnail_width!: number;
+    @Prop(String) private title!: string;
+    @Prop(String) private url!: string;
+    ```
+
+    These properties are defined using the `@Prop` decorator to specify their types, name, default values, and so forth.  The names are taken directly from the properties of our Dgraph predicates used by a Post node.
+
+    As mentioned before, computed properties are specified by a getter method within the class component, so we're using such computed properties to "calculate" additional logic.  We won't go over them all, but `thumbnailUrl()` is a good example as it allows us to return the proper post thumbnail URL based on the possible values found in the database.
+
+    {{% notice "tip" %}} The `thumbnailUrl()` property references two custom thumbnail images which you can download and add to your `src/assets/images/` directory to include them in your own project.  They can be found in the [src/assets/images](https://github.com/GabeStah/dgraph-reddit/tree/master/src/assets/images) directory of the GitHub [repository](https://github.com/GabeStah/dgraph-reddit). {{% /notice %}}
+
+2.  Next, let's update the HTML section of the `Post.vue` component.  We'll go through each of the three `v-flex` elements one at time.
+
+    ```html
+    <v-flex class="votes" xs1 px-1 mx-1>
+      <v-icon class="arrow up accentuated">arrow_upward</v-icon>
+      <span class="score">{{ score }}</span>
+      <v-icon class="arrow down accentuated">arrow_downward</v-icon>
+    </v-flex>
+    ```
+
+    The only change here is to use the actual `score` property passed to the `Post` component instance.  Vue's [text interpolation](https://vuejs.org/v2/guide/syntax.html#Interpolations) syntax merely requires surrounding a property value with double curly braces (aka "mustaches").  This syntax is used all the time within Vue templates, so you'll see it frequently.
+
+3.  The second flexbox section should be updated as seen below.
+
+    ```html
+    <v-flex class="thumbnail" xs1 px-1 mx-1>
+      <a :href="fullUrl">
+        <v-img
+          :src="thumbnailUrl"
+          :lazy-src="thumbnailUrl"
+          aspect-ratio="1"
+          height="70"
+          width="70"
+        />
+      </a>
+    </v-flex>
+    ```
+
+    We're no longer using static URL strings, but instead are binding `:href`, `:src`, and `:lazy-src` attributes to computed property functions.
+
+4.  The last flexbox should look like the following.
+
+    ```html
+    <v-flex class="content" xs10 px-1 mx-1>
+      <span class="title">
+        <a :href="fullUrl" class="text--primary">{{ title }}</a>
+        <span class="domain text--secondary caption ml-1 font-weight-bold"
+          >(<a :href="domainUrl" class="text--secondary accentuated">{{
+            domain
+          }}</a
+          >)</span
+        >
+      </span>
+      <span class="tagline caption">
+        submitted {{ created_utc | moment('from') }} by
+        <a class="accentuated" :href="authorUrl" v-if="hasAuthor">{{
+          author
+        }}</a>
+        <span v-else>{{ author }}</span>
+        to
+        <a class="accentuated" :href="subredditUrl">r/{{ subreddit }}</a>
+      </span>
+      <ul class="buttons font-weight-medium">
+        <li class="comment">
+          <a :href="permalink" class="text--secondary accentuated"
+            >{{ num_comments }} comments</a
+          >
+        </li>
+        <li class="share">
+          <a href="#" class="text--secondary accentuated">share</a>
+        </li>
+        <li class="save">
+          <a href="#" class="text--secondary accentuated">save</a>
+        </li>
+        <li class="toggle">
+          <a href="#" class="text--secondary accentuated">hide</a>
+        </li>
+        <li class="award">
+          <a href="#" class="text--secondary accentuated">give award</a>
+        </li>
+        <li class="report">
+          <a href="#" class="text--secondary accentuated">report</a>
+        </li>
+        <li class="crosspost">
+          <a href="#" class="text--secondary accentuated">crosspost</a>
+        </li>
+      </ul>
+    </v-flex>
+    ```
+
+    Quite a lot has changed here, but the same rules as techniques used in the previous sections apply.  The first notable addition is `submitted {{ created_utc | moment('from') }}`.  The pipe character indicates a Vue [filter function](https://vuejs.org/v2/guide/filters.html), which simplifies text formatting within Vue templates.  In this case, we're using a special `moment()` filter function to transform the `created_utc` date into a human-readable "X seconds ago" format.
+
+    The other unknown addition is just below that in which we use the `v-if` and `v-else` directives to determine if the post has a valid author.  If so, a `<a>` link element is added to link to the author URL.  Otherwise, no link is set and the author is printed in plain text.  This mimics the Reddit behavior of `[deleted]` users who no longer have a user page, but may still have active comments or posts.
+
+5.  The last step is to add the [`vue-moment` library](https://www.npmjs.com/package/vue-moment), which provides a filter function we can use in Vue that behaves similar to [`Moment.js`](http://momentjs.com/).
+
+    ```bash
+    yarn add vue-moment
+    ```
+
+    Open the `src/main.ts` file and add the following code to import and use `vue-moment`.
+
+    ```ts
+    import VueMoment from 'vue-moment';
+    Vue.use(VueMoment);
+    ```
+
+Alright, our `Post` component is updated and ready to display the data it receives from the parent `PostList` component.  Save everything and run `yarn serve` to check out the new post list, which will show the first `100` post records in the database.
+
+![Post List with Dgraph Data](/images/PostList-data.png)
 
 ## Query Only Comments
 
@@ -1629,12 +2013,3 @@ Vue.use(Vuex);
   }
 }
 ```
-
-
-
-### Using Material Icons
-
-### Post List Layout
-
-
-

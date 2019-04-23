@@ -1,18 +1,16 @@
 export const Types = {
   Action: {
     Post: {
-      Add: 'Post.Add',
-      Get: 'Post.Get',
-      GetAll: 'Post.GetAll',
-      Set: 'Post.Set'
+      Get: {
+        Paginated: 'Post.Get.Paginated'
+      }
     }
   },
   Mutation: {
     Post: {
-      Add: 'Post.Add',
-      Get: 'Post.Get',
-      GetAll: 'Post.GetAll',
-      Set: 'Post.Set'
+      Set: {
+        Paginated: 'Post.Set.Paginated'
+      }
     }
   }
 };
