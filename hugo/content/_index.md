@@ -1,10 +1,20 @@
 ---
 author: 'Gabe Wyatt'
 date: 2019-04-13T10:42:34-07:00
-linktitle: Dgraph Reddit Tutorial
-title: Dgraph Reddit Tutorial
+linktitle: How to Recreate Reddit with Dgraph and Vue.js
+title: How to Recreate Reddit with Dgraph and Vue.js
 weight: 10
 ---
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/typescript.min.js"></script>
+
+Dgraph is able to handle robust data sets, even those from applications built designed to use more traditional relational databases.  With just some minor adjustments to your thinking you'll see how Dgraph and its GraphQL+- syntax can be used to work with large data sets from popular real-world applications.
+
+In this tutorial we'll walk step-by-step through the process if creating a Reddit-style front end application using _massive, real-world_ Reddit data dumps imported into Dgraph.  We'll explore how Dgraph efficiently manages large data sets, even while running within relatively humble Docker environments.  We'll also see how, with just a few minor adjustments to our application logic, we can use Dgraph to query and mutate data that wasn't designed to work with a graph database like Dgraph in the first place.  We'll see how multiple types of objects can share the same fields (i.e. **predicates**) within Dgraph, and yet the power of GraphQL+- queries will allow us to differentiate between record types in whatever manner is best suited to our application.
+
+In addition to Dgraph for our database we'll also be using the [Vue.js](https://vuejs.org/) framework to create the front end application.  This lets us build out a responsive and modern version of Reddit that can easily be modified to include addition functionality.  Vue provides a number of advantages over other popular libraries by allowing us to combine HTML, CSS, and JavaScript for a given component within a single file, which dramatically improves readability and separation of concerns.
+
+You are encouraged to follow along with the tutorial step-by-step, but if you want to reference to full code set feel free to check out the [repository](https://github.com/GabeStah/dgraph-reddit) at any time.  With that, let's jump right into it!
 
 ## Create a Vue CLI Project
 
@@ -663,7 +673,7 @@ Since these data sets start to get quite huge, we'll just use a small sampling t
 
 ## Adding Reddit Data to Dgraph
 
-If you look at the content of one of the `RS_` or `RC_` Reddit data dump files, you'll see they are in single-line JSON format.
+If you look at the content of one of the `RS_` or `RC_` Reddit data dump files, you'll see they are in single-line JSON format. Here's a **submission** record example.
 
 ```json
 {
@@ -718,7 +728,7 @@ If you look at the content of one of the `RS_` or `RC_` Reddit data dump files, 
 }
 ```
 
-As we already saw above, Dgraph's GraphQL+- engine can accept JSON data within mutations, so we just need to create a helper function that can efficiently extract this data and push it to a Dgraph mutation. However, as discussed these are rather large files, so we cannot simply load them into memory and try reading their content. The solution? We'll be using [Node Streams](https://nodejs.org/api/stream.html)!
+As we already saw above, Dgraph's GraphQL+- engine can accept JSON data within mutations, so we just need to create a helper function that can efficiently extract this data and push it to a Dgraph mutation. However, since these are rather large files, we cannot simply load and read their content from memory. The solution we'll be using is [Node Streams](https://nodejs.org/api/stream.html).
 
 A stream in Node is a rather abstract concept that is used throughout the standard library. Conceptually, a stream is a collection of data similar to an array or object, with one major caveat: Stream data is _temporal_ since it mutates over time. So, in the case of reading the data from our 2+ GB file, we don't have to read it all at once and hold the data in memory, but we'll instead use a stream that will slowly trickle the data in over time in chunks, which we'll then process as needed.
 
@@ -1026,7 +1036,7 @@ Before we add a great deal of data we should take this opportunity to setup a re
 
     Since `DgraphAdapter.alterSchema()` returns a `Promise` we can use the [`Promise.all()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all) method and pass it a collection of promises. This ensures that the `db:schema:alter` task only completes after the database has been updated using both schema sets.
 
-4.  Now drop existing data and then update the schema with the `db:schema:alter` command.
+4.  Now drop the existing data and then update the schema with the `db:schema:alter` command.
 
     ```bash
     gulp db:drop
@@ -1073,11 +1083,11 @@ Stream closed, processed 25000 out of 25000 records.
 
 ## Working with Vue
 
-Now that our Dgraph connection is established and we've seeded the database with some initial data it's time to start creating our front-end application pages via Vue.  We'll start by creating the most basic component of a Reddit-like app: the **Post** list.  Below is a rough sketch of what that component should look like when we've created it in HTML and CSS.
+Now that our Dgraph connection is established and we've seeded the database with some initial data it's time to start creating our front-end application pages via Vue. We'll start by creating the most basic component of a Reddit-like app: the **Post** list. Below is a rough sketch of what that component should look like when we've created it in HTML and CSS.
 
 ![Post List Mockup](/images/PostList-mockup@2x.png)
 
-To help us out we'll use a Vue framework based on Google's [Material Design](https://material.io/design/) specifications called [Vuetify](https://vuetifyjs.com/en/).  Like other front-end frameworks, it provides some out-of-the-box CSS and custom HTML elements we can use to create our app.
+To help us out we'll use a Vue framework based on Google's [Material Design](https://material.io/design/) specifications called [Vuetify](https://vuetifyjs.com/en/). Like other front-end frameworks, it provides some out-of-the-box CSS and custom HTML elements we can use to create our app.
 
 ### Configuring Vuetify
 
@@ -1126,7 +1136,7 @@ To help us out we'll use a Vue framework based on Google's [Material Design](htt
 
     As of the time of writing there is currently a small bug with TypeScript and the Vuetify plugin installation when trying to access the direct `/lib` directory (types declarations cannot be found). The above change fixes that issue.
 
-    As seen above, we also are overriding the default `theme` property to specify some custom colors, but feel free to play around with those values to get a look you prefer.  The `options.customProperties` value of `true` will allow us to explicitly use CSS properties generated by Vuetify throughout the application, so we can reference theme colors and the like within component CSS.
+    As seen above, we also are overriding the default `theme` property to specify some custom colors, but feel free to play around with those values to get a look you prefer. The `options.customProperties` value of `true` will allow us to explicitly use CSS properties generated by Vuetify throughout the application, so we can reference theme colors and the like within component CSS.
 
     You can also opt to use pre-defined colors by adding `import colors from 'vuetify/es5/util/colors';` to the top of the file, then referencing those colors within the custom `theme` property.
 
@@ -1161,9 +1171,9 @@ To help us out we'll use a Vue framework based on Google's [Material Design](htt
 
 ### Post Component
 
-Since we're using TypeScript we gain some benefits of using class-based components within Vue.  We can combine the [`vue-class-component`](https://github.com/vuejs/vue-class-component) library with the [`vue-property-decorator`](https://github.com/kaorun343/vue-property-decorator) library to dramatically reduce the lines of code required in our components by using assorted decorators.
+Since we're using TypeScript we gain some benefits of using class-based components within Vue. We can combine the [`vue-class-component`](https://github.com/vuejs/vue-class-component) library with the [`vue-property-decorator`](https://github.com/kaorun343/vue-property-decorator) library to dramatically reduce the lines of code required in our components by using assorted decorators.
 
-{{% notice "tip" %}} We'll be using [Single File Vue Components](https://vuejs.org/v2/guide/single-file-components.html) throughout this project, which provide a number of benefits over globally defined components by placing all the HTML, CSS, and JavaScript for a given component within a single `.vue` file.  The biggest advantage for us is separation of concerns, so each component is self-contained and can be used anywhere we need it throughout the app.   Check out the [official documentation](https://vuejs.org/v2/guide/single-file-components.html) for far more details on Single File Components. {{% /notice %}}
+{{% notice "tip" %}} We'll be using [Single File Vue Components](https://vuejs.org/v2/guide/single-file-components.html) throughout this project, which provide a number of benefits over globally defined components by placing all the HTML, CSS, and JavaScript for a given component within a single `.vue` file. The biggest advantage for us is separation of concerns, so each component is self-contained and can be used anywhere we need it throughout the app. Check out the [official documentation](https://vuejs.org/v2/guide/single-file-components.html) for far more details on Single File Components. {{% /notice %}}
 
 1.  Start by installing both the `vue-class-component` and `vue-property-decorator` libraries.
 
@@ -1188,22 +1198,22 @@ Since we're using TypeScript we gain some benefits of using class-based componen
     <style scoped lang="scss"></style>
     ```
 
-    These three sections are what makeup a `.vue` single file component.  The top section contains the HTML template, the middle contains the JavaScript, and the bottom contains the CSS styling.  As you can see, by adding the `lang="ts"` property to the `<script>` element we can tell our editor and parser that we're using TypeScript.  Similarly, the `lang="scss"` tells the parser our styling will use [Sass](https://sass-lang.com/).
+    These three sections are what makeup a `.vue` single file component. The top section contains the HTML template, the middle contains the JavaScript, and the bottom contains the CSS styling. As you can see, by adding the `lang="ts"` property to the `<script>` element we can tell our editor and parser that we're using TypeScript. Similarly, the `lang="scss"` tells the parser our styling will use [Sass](https://sass-lang.com/).
 
-    {{% notice "tip" %}} [Sass](https://sass-lang.com/) is a mature and powerful CSS extension that works with any normal CSS, but provides a number of useful features such as variables, nesting, and mixins.  Check out the [full guide](https://sass-lang.com/guide) for more information on using Sass. {{% /notice %}}
+    {{% notice "tip" %}} [Sass](https://sass-lang.com/) is a mature and powerful CSS extension that works with any normal CSS, but provides a number of useful features such as variables, nesting, and mixins. Check out the [full guide](https://sass-lang.com/guide) for more information on using Sass. {{% /notice %}}
 
-    The `@Component` decorator that precedes our `Post` class declaration is provided by the `vue-class-component` library.  It allows us to define parts of our component more succinctly than normal.  For example, a normal Vue component would register state `data` by returning an object with child properties.  
+    The `@Component` decorator that precedes our `Post` class declaration is provided by the `vue-class-component` library. It allows us to define parts of our component more succinctly than normal. For example, a normal Vue component would register state `data` by returning an object with child properties.
 
     ```ts
     export default {
-      data () {
+      data() {
         return {
           id: 1234,
           name: 'Alice'
-        }
-      },
+        };
+      }
       // ...
-    }
+    };
     ```
 
     Similarly, **computed** properties that provide complex logic to otherwise normal component properties are defined within a `computed` object.
@@ -1211,12 +1221,12 @@ Since we're using TypeScript we gain some benefits of using class-based componen
     ```ts
     export default {
       computed: {
-        lowercaseName () {
+        lowercaseName() {
           return this.name.toUpperCase();
         }
-      },
+      }
       // ...
-    }
+    };
     ```
 
     However, with the `@Component` decorator on a Vue class component we can simplify `data` and `computed` property declarations.
@@ -1227,13 +1237,13 @@ Since we're using TypeScript we gain some benefits of using class-based componen
       id = 1234;
       name = 'Alice';
 
-      get lowercaseName () {
+      get lowercaseName() {
         return this.name.toUpperCase();
       }
     }
     ```
 
-    As you can see, `data` properties are now defined by declaring class members and `computed` properties are class getter methods!  Generally, most aspects of Vue component definitions are simplified through the use of `vue-class-decorator` and `vue-property-decorator`.
+    As you can see, `data` properties are now defined by declaring class members and `computed` properties are class getter methods! Generally, most aspects of Vue component definitions are simplified through the use of `vue-class-decorator` and `vue-property-decorator`.
 
 #### Post Component HTML
 
@@ -1241,26 +1251,25 @@ Since we'll be reusing the `Post.vue` component we want to define the HTML so it
 
 ![Post List Mockup](/images/PostList-mockup@2x.png)
 
-We'll be using [Vuetify's grid system](https://vuetifyjs.com/en/framework/grid), which is based on the standard CSS [flexbox](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout/Basic_Concepts_of_Flexbox).  This allows us to split our layout into a series of responsive columns (12 of them in this case).
+We'll be using [Vuetify's grid system](https://vuetifyjs.com/en/framework/grid), which is based on the standard CSS [flexbox](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout/Basic_Concepts_of_Flexbox). This allows us to split our layout into a series of responsive columns (12 of them in this case).
 
 1.  We'll start by adding the `<v-layout>` element within the root `<template>` element.
 
     ```html
     <template>
-      <v-layout class="post" row wrap my-2>
-      </v-layout>
+      <v-layout class="post" row wrap my-2> </v-layout>
     </template>
     ```
 
     The grid system uses a progressive series of elements:
 
-    - `<v-container>` - The base element of a grid system.  Should contain one or more `<v-layout>` elements.
+    - `<v-container>` - The base element of a grid system. Should contain one or more `<v-layout>` elements.
     - `<v-layout>` - Similar to a `<v-container>`, but multiple `<v-layout>` can exist within a single `<v-container>`, providing the ability for grids _within_ other grids.
-    - `<v-flex>` - The "content holder" element of a grid.  The underlying [`flex`](https://developer.mozilla.org/en-US/docs/Web/CSS/flex) CSS property of a `<v-flex>` is set to `1`, which means a series of `<v-flex>` elements will attempt to responsively fill out the space they are given within their parent `<v-layout>`.
+    - `<v-flex>` - The "content holder" element of a grid. The underlying [`flex`](https://developer.mozilla.org/en-US/docs/Web/CSS/flex) CSS property of a `<v-flex>` is set to `1`, which means a series of `<v-flex>` elements will attempt to responsively fill out the space they are given within their parent `<v-layout>`.
 
-    We'll actually specify the parent `<v-container>` element in another component further up the chain, since we don't want each individual `Post` element to be a container unto itself.  The `<v-layout>` `row` class ensures we're flexing across rows (not columns).  We also want children to be able to wrap if needed.  Finally, we'll make heavy use of `margin` and/or `padding` throughout this component by using the Vuetify CSS [spacing classes](https://vuetifyjs.com/en/framework/spacing).  So, the `my-2` class translates into `margin: 2px 0;` since we want a 2-pixel margin along the y-axis (top and bottom).
+    We'll actually specify the parent `<v-container>` element in another component further up the chain, since we don't want each individual `Post` element to be a container unto itself. The `<v-layout>` `row` class ensures we're flexing across rows (not columns). We also want children to be able to wrap if needed. Finally, we'll make heavy use of `margin` and/or `padding` throughout this component by using the Vuetify CSS [spacing classes](https://vuetifyjs.com/en/framework/spacing). So, the `my-2` class translates into `margin: 2px 0;` since we want a 2-pixel margin along the y-axis (top and bottom).
 
-2.  Our `Post` layout has three distinct horizontal sections: Voting, thumbnail image, and post content.  Therefore, we'll split each of those sections into their own `<v-flex>` element.  Let's start by adding the **voting** flexbox.
+2.  Our `Post` layout has three distinct horizontal sections: Voting, thumbnail image, and post content. Therefore, we'll split each of those sections into their own `<v-flex>` element. Let's start by adding the **voting** flexbox.
 
     ```html
     <template>
@@ -1275,8 +1284,8 @@ We'll be using [Vuetify's grid system](https://vuetifyjs.com/en/framework/grid),
     ```
 
     We're making use of the **Material Icons** pack that is part of the library, in addition to adding some helper classes we'll use later.
-    
-    {{% notice "info" %}} The `xs1` CSS class helper seen in the `<v-flex>` element above works like many other responsive frameworks.  `xs` is one of Vuetify's [display](https://vuetifyjs.com/en/framework/display) options and it sets a breakpoint for viewports under `600px`.  We don't really want to worry about viewports for this tutorial, so using the `xs` extreme lets us effectively not have a breakpoint to worry about (since all displays should meet that criteria).  The `1` following `xs` is the number of columns our flexbox is spanning.  {{% /notice %}}
+
+    {{% notice "info" %}} The `xs1` CSS class helper seen in the `<v-flex>` element above works like many other responsive frameworks. `xs` is one of Vuetify's [display](https://vuetifyjs.com/en/framework/display) options and it sets a breakpoint for viewports under `600px`. We don't really want to worry about viewports for this tutorial, so using the `xs` extreme lets us effectively not have a breakpoint to worry about (since all displays should meet that criteria). The `1` following `xs` is the number of columns our flexbox is spanning. {{% /notice %}}
 
 3.  Next, let's add another flexbox as a sibling to the `.votes` flexbox with the `.thumbnail` class.
 
@@ -1303,7 +1312,7 @@ We'll be using [Vuetify's grid system](https://vuetifyjs.com/en/framework/grid),
     </template>
     ```
 
-    We're pulling some placeholder images for now and setting their size to `70x70` pixels.  The special `:lazy-src` `<v-img>` property is helpful when you want to display a temporary image while the full, normal image loads in the background.
+    We're pulling some placeholder images for now and setting their size to `70x70` pixels. The special `:lazy-src` `<v-img>` property is helpful when you want to display a temporary image while the full, normal image loads in the background.
 
 4.  Our third flexbox is the `.content` class.
 
@@ -1329,9 +1338,9 @@ We'll be using [Vuetify's grid system](https://vuetifyjs.com/en/framework/grid),
         <v-flex class="content" xs10 px-1 mx-1>
           <span class="title">
             <a href="#" class="text--primary"
-              >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent eu
-              maximus sem. Aliquam erat volutpat. Aliquam maximus efficitur ligula
-              eu vestibulum.</a
+              >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent
+              eu maximus sem. Aliquam erat volutpat. Aliquam maximus efficitur
+              ligula eu vestibulum.</a
             >
             <span class="domain text--secondary caption ml-1 font-weight-bold"
               >(<a href="/r/AskReddit" class="text--secondary accentuated"
@@ -1372,7 +1381,7 @@ We'll be using [Vuetify's grid system](https://vuetifyjs.com/en/framework/grid),
     </template>
     ```
 
-    We want the content to take up the majority of the remaining space, so we set the flexbox width to `xs10` to take up 10 out of the 12 total columns.  The `text--primary` and `text--secondary` classes are references to theme CSS properties.  It's helpful to use such classes wherever possible so that we can change the look of the entire app with just a few color changes to the theme.
+    We want the content to take up the majority of the remaining space, so we set the flexbox width to `xs10` to take up 10 out of the 12 total columns. The `text--primary` and `text--secondary` classes are references to theme CSS properties. It's helpful to use such classes wherever possible so that we can change the look of the entire app with just a few color changes to the theme.
 
     We're also playing with the font weighting for a number of elements, just to make things appear more like they do in the actual Reddit.
 
@@ -1424,11 +1433,11 @@ Update the `<style></style>` section of `src/components/Post.vue` to look like t
 </style>
 ```
 
-We won't go into much detail here since most of this is basic CSS, but it's worth mentioning that the use of Sass lets us _nest_ our CSS selectors.  This means that rules inside `.post { .votes { ... } }` will _only_ apply to `.votes` found within `.post`, but not elsewhere.  It also helps to visually mimic the hierarchical structure found in the HTML.
+We won't go into much detail here since most of this is basic CSS, but it's worth mentioning that the use of Sass lets us _nest_ our CSS selectors. This means that rules inside `.post { .votes { ... } }` will _only_ apply to `.votes` found within `.post`, but not elsewhere. It also helps to visually mimic the hierarchical structure found in the HTML.
 
 #### Post Component Script
 
-At this point, we aren't actually implementing any logic into the `Post` component, so the script section can be left as is.  We'll come back to it shortly once we have our layout looking like we want.  For now, let's move up the chain and create the `PostList` component that will use instances of our `Post` component.
+At this point, we aren't actually implementing any logic into the `Post` component, so the script section can be left as is. We'll come back to it shortly once we have our layout looking like we want. For now, let's move up the chain and create the `PostList` component that will use instances of our `Post` component.
 
 ### PostList Component
 
@@ -1448,17 +1457,15 @@ import Post from '@/components/Post.vue';
 @Component({
   components: { Post }
 })
-export default class PostList extends Vue {
-  @Prop() private posts!: Post;
-}
+export default class PostList extends Vue {}
 </script>
 
 <style scoped lang="scss"></style>
 ```
 
-As mentioned before, here is where we've added the `<v-container>` element that specifies we want a grid list.  Within that container we're using a [`v-for`](https://vuejs.org/v2/guide/list.html#Mapping-an-Array-to-Elements-with-v-for) loop to render a list of `Post` elements.  Normally `v-for` would be used to render a collection of objects from data, but for testing purposes we're just using a collection of numbers.  As with `React` and other frameworks, we must ensure we pass a unique `:key` property value when iterating through a list.
+As mentioned before, here is where we've added the `<v-container>` element that specifies we want a grid list. Within that container we're using a [`v-for`](https://vuejs.org/v2/guide/list.html#Mapping-an-Array-to-Elements-with-v-for) loop to render a list of `Post` elements. Normally `v-for` would be used to render a collection of objects from data, but for testing purposes we're just using a collection of numbers. As with `React` and other frameworks, we must ensure we pass a unique `:key` property value when iterating through a list.
 
-The script is fairly simple and similar to what we saw in the `Post` component, but we're passing an object to the `@Component` directive and specifying that our `components` property contains the `Post` component.  Now all we have to do is get our app to render the `PostList` component and we'll be in business!
+The script is fairly simple and similar to what we saw in the `Post` component, but we're passing an object to the `@Component` directive and specifying that our `components` property contains the `Post` component. Now all we have to do is get our app to render the `PostList` component and we'll be in business!
 
 #### Handling Global Sass Variables
 
@@ -1495,7 +1502,7 @@ We need a convenient way to inject custom CSS throughout the app, which we can d
 
     Now in the `src/components/Post.vue` component where we use the `accentuated` class we'll see `:hover` effects using the accent base color specified in our Vuetify theme.
 
-    {{% notice "warning" %}} Unfortunately, Vuetify defaults to using the `!important` flag for a number of its generated CSS classes.  Therefore, if you notice custom CSS changes aren't taking affect you may have to resort to adding the `!important` flag to your own CSS rules intended to take precedence. {{% /notice %}}
+    {{% notice "warning" %}} Unfortunately, Vuetify defaults to using the `!important` flag for a number of its generated CSS classes. Therefore, if you notice custom CSS changes aren't taking affect you may have to resort to adding the `!important` flag to your own CSS rules intended to take precedence. {{% /notice %}}
 
 ### Updating the App and Home Components
 
@@ -1554,7 +1561,7 @@ The default Vue layout looks neat and all, but we obviously need to get rid of t
 
     This should look familiar as the structure is almost identical to what we saw in the `PostList` component.
 
-4.  That's it!  Now just run the dev server with `yarn serve` to launch the updated app.
+4.  That's it! Now just run the dev server with `yarn serve` to launch the updated app.
 
     ```bash
     yarn serve
@@ -1564,25 +1571,17 @@ The default Vue layout looks neat and all, but we obviously need to get rid of t
 
     It should look something like the above screenshot.
 
-#### PostList Branch Snapshot
-
-At certain milestones throughout the development there will be branches of the project snapshotted and deployed for public viewing, so you can see the apps current running state in action even if you aren't following along with the code on your machine.
-
-Check out what the app currently looks like at the URL below.
-
-- [Added PostList Branch Snapshot](https://added-postlist.dgraph-reddit.pingpub.dev/)
-
 ### Querying Dgraph
 
 Now that our `PostList` component is configured it's time to populate it with actual data from Dgraph.
 
 #### Managing State With the Vuex Library
 
-As is common practice with Vue applications we'll be using the [`vuex` library](https://vuex.vuejs.org/) which provides common statement management patterns similar to those found in React/Redux and the like.  Similar to Redux, Vuex uses a combination of **actions** and **mutations** to perform one-way transactions.  An action never _modifies_ the state and, instead, merely provides instruction for a mutation to perform actual state changes.
+As is common practice with Vue applications we'll be using the [`vuex` library](https://vuex.vuejs.org/) which provides common statement management patterns similar to those found in React/Redux and the like. Similar to Redux, Vuex uses a combination of **actions** and **mutations** to perform one-way transactions. An action never _modifies_ the state and, instead, merely provides instruction for a mutation to perform actual state changes.
 
 {{% notice "tip" %}} This tutorial will cover the basics of Vuex and its state management pattern, but you're encouraged to check out the [official documentation](https://vuex.vuejs.org/) for a lot more information about what Vuex can do. {{% /notice %}}
 
-1.  Vuex will already be installed if you used the same configuration found in [Create a Vue CLI Project](#create-a-vue-cli-project).  However, if not, feel free to add it manually via npm or yarn.
+1.  Vuex will already be installed if you used the same configuration found in [Create a Vue CLI Project](#create-a-vue-cli-project). However, if not, feel free to add it manually via npm or yarn.
 
     ```bash
     yarn add vuex
@@ -1652,7 +1651,7 @@ As is common practice with Vue applications we'll be using the [`vuex` library](
     };
     ```
 
-    Vuex expects a given **action** or **mutation** to be defined by a unique `string` value key.  However, it is useful to use enumerations or other static options to define these keys so you don't need to manually remember and enter the names of the actions or mutations you're performing.  That's what the `types.ts` file above accomplishes.  It will allow us to reference potentially complex action or mutation names through values the editor will verify.
+    Vuex expects a given **action** or **mutation** to be defined by a unique `string` value key. However, it is useful to use enumerations or other static options to define these keys so you don't need to manually remember and enter the names of the actions or mutations you're performing. That's what the `types.ts` file above accomplishes. It will allow us to reference potentially complex action or mutation names through values the editor will verify.
 
 7.  Open `src/state/actions.ts` and add the following code.
 
@@ -1684,23 +1683,23 @@ As is common practice with Vue applications we'll be using the [`vuex` library](
     };
     ```
 
-    Here is where we're defining the actual actions that we want to be able to dispatch.  The `Actions` object is just a collection of functions and we're naming them using the pre-defined `Types` found in the `src/state/types.ts` file.  In this case, we've defined an `async` action named the value of `Types.Action.Post.Get.Paginated`.
+    Here is where we're defining the actual actions that we want to be able to dispatch. The `Actions` object is just a collection of functions and we're naming them using the pre-defined `Types` found in the `src/state/types.ts` file. In this case, we've defined an `async` action named the value of `Types.Action.Post.Get.Paginated`.
 
-    Vuex [actions](https://vuex.vuejs.org/guide/actions.html) pass a `context` parameter which allows us to access the state (`context.state`) or commit a mutation (`context.commit`).  Here, we only need access to the `commit` function, so we're destructuring it in the parameter definition (which is a common pattern when using Vuex).  We're also accepting a second set of custom arguments which we'll use to adjust the logic of the action.  Remember, actions can be asynchronous but _cannot_ modify the state, but should just commit a mutation informing the state of a potential change.
+    Vuex [actions](https://vuex.vuejs.org/guide/actions.html) pass a `context` parameter which allows us to access the state (`context.state`) or commit a mutation (`context.commit`). Here, we only need access to the `commit` function, so we're destructuring it in the parameter definition (which is a common pattern when using Vuex). We're also accepting a second set of custom arguments which we'll use to adjust the logic of the action. Remember, actions can be asynchronous but _cannot_ modify the state, but should just commit a mutation informing the state of a potential change.
 
-    This GraphQL+- query we're performing defines two [GraphQL Variables](https://docs.dgraph.io/query-language/#graphql-variables) (`$first` and `$offset`), which allows us to pass arguments to Dgraph to dynamically modify the query.  Both `first` and `offset` filters are part of the built-in [pagination](https://docs.dgraph.io/query-language/#pagination) options.  Thus, the default values of `50` and `0`, respectively, will return the first `50` posts.  The extra `@filter` directives used here are just to narrow the search down so we don't get any crossposts, nor anything that might be NSFW.
+    This GraphQL+- query we're performing defines two [GraphQL Variables](https://docs.dgraph.io/query-language/#graphql-variables) (`$first` and `$offset`), which allows us to pass arguments to Dgraph to dynamically modify the query. Both `first` and `offset` filters are part of the built-in [pagination](https://docs.dgraph.io/query-language/#pagination) options. Thus, the default values of `50` and `0`, respectively, will return the first `50` posts. The extra `@filter` directives used here are just to narrow the search down so we don't get any crossposts, nor anything that might be NSFW.
 
     If you have Dgraph running locally you can test that query below.
 
-    <!-- prettier-ignore-start -->
+    <!-- prettier-ignore-start -->  
     {{< runnable >}}
     query posts($first: int, $offset: int) {
       data(func: has(domain), first: 50, offset: 0)
         @filter((not has(crosspost_parent)) and eq(over_18, false)) {
-        uid
-        expand(_all_) {
           uid
-          expand(_all_)
+          expand(_all_) {
+            uid
+            expand(_all_)
         }
       }
     }
@@ -1709,7 +1708,7 @@ As is common practice with Vue applications we'll be using the [`vuex` library](
 
     As you may recall from [Querying Dgraph](#querying-dgraph) the call to `DgraphAdapter().query()` lets us pass optional arguments, and if they exist it will invoke the `txn.queryWithVars()` method from the `dgraph-js-http` library.
 
-    Once the result of our query has returned we finish by calling the `commit()` method to invoke the appropriate mutation.  Since the action name was `Post.Get.Paginated` to invoke a retrieval of posts that we pass as the payload argument to our mutation, the mutation we'll commit is `Post.Set.Paginated`.  We could name these anything we want and may want to change them in the future, but this seems like an appropriate name for a mutation that _changes_ the paginated post list.
+    Once the result of our query has returned we finish by calling the `commit()` method to invoke the appropriate mutation. Since the action name was `Post.Get.Paginated` to invoke a retrieval of posts that we pass as the payload argument to our mutation, the mutation we'll commit is `Post.Set.Paginated`. We could name these anything we want and may want to change them in the future, but this seems like an appropriate name for a mutation that _changes_ the paginated post list.
 
 8.  Speaking of mutations, open `src/state/mutations.ts` and paste the following into it.
 
@@ -1718,14 +1717,14 @@ As is common practice with Vue applications we'll be using the [`vuex` library](
 
     export const Mutations = {
       [Types.Mutation.Post.Set.Paginated](state: any, { posts }: { posts: any[] }) {
-        state.posts = posts;
+        state.posts = [...state.posts, ...posts];
       }
     };
     ```
 
-    As with the `Actions` object exported from `src/state/actions.ts`, the `Mutations` object is a collection of mutation methods.  The first parameter provided by Vuex is the current state, which is required and will be used to update or _mutate_ the state within the handler function.  We've also opted to pass an optional second argument that contains custom data used to process this mutation.  Here we're destructuring the `posts` property that was passed via the `commit()` method in our action, and setting the `state.posts` value to it.
+    As with the `Actions` object exported from `src/state/actions.ts`, the `Mutations` object is a collection of mutation methods. The first parameter provided by Vuex is the current state, which is required and will be used to update or _mutate_ the state within the handler function. We've also opted to pass an optional second argument that contains custom data used to process this mutation. Here we're destructuring the `posts` property that was passed via the `commit()` method in our action, and setting the `state.posts` value to it.
 
-9.  The final step is to open `src/state/state.ts` and set the _initial_ state values for any state properties we'll be using.  In this case, we just have the `posts` property used above.
+9.  The final step is to open `src/state/state.ts` and set the _initial_ state values for any state properties we'll be using. In this case, we just have the `posts` property used above.
 
     ```ts
     export const State = {
@@ -1737,7 +1736,7 @@ As is common practice with Vue applications we'll be using the [`vuex` library](
 
 Now that our state is configured and we can extract some paginated post data we need to add that functionality to our `src/components/PostList.vue` component.
 
-1.  Open `src/components/PostList.vue` and add the following `getPosts()` computed property and `created()` lifecycle method to the `PostList` class.  Don't forget the new `{ Types }` `import` as well.
+1.  Open `src/components/PostList.vue` and add the following `getPosts()` computed property and `created()` lifecycle method to the `PostList` class. Don't forget the new `{ Types }` `import` as well.
 
     ```ts
     <script lang="ts">
@@ -1749,8 +1748,6 @@ Now that our state is configured and we can extract some paginated post data we 
       components: { Post }
     })
     export default class PostList extends Vue {
-      @Prop() private posts!: Post;
-
       get getPosts() {
         return this.$store.state.posts;
       }
@@ -1766,9 +1763,9 @@ Now that our state is configured and we can extract some paginated post data we 
     </script>
     ```
 
-    Vue has a number of component [lifecycle hooks](https://vuejs.org/v2/guide/instance.html#Instance-Lifecycle-Hooks), one of which is `created`.  The [`vue-class-component`](https://github.com/vuejs/vue-class-component) library lets us add run code during these lifecycle hooks by declaring class methods with the matching names and passing functions that should be executed during those hooks.  Thus, the `public async create()` method fires after the `PostList` component instance is created.  In it we await the result dispatching the `Post.Get.Paginated` action with extra optional arguments.  As we saw above, this will retrieve the data from Dgraph and then commit a mutation to update the state.
+    Vue has a number of component [lifecycle hooks](https://vuejs.org/v2/guide/instance.html#Instance-Lifecycle-Hooks), one of which is `created`. The [`vue-class-component`](https://github.com/vuejs/vue-class-component) library lets us add run code during these lifecycle hooks by declaring class methods with the matching names and passing functions that should be executed during those hooks. Thus, the `public async create()` method fires after the `PostList` component instance is created. In it we await the result dispatching the `Post.Get.Paginated` action with extra optional arguments. As we saw above, this will retrieve the data from Dgraph and then commit a mutation to update the state.
 
-    The `getPosts` getter is a _computed_ property, which means that Vue will intelligently evaluate the value of this property and dynamically re-render any components that rely on this property when the value changes.  Therefore, when the `state.posts` property changes, the value of the `getPosts` property is also updated.
+    The `getPosts` getter is a _computed_ property, which means that Vue will intelligently evaluate the value of this property and dynamically re-render any components that rely on this property when the value changes. Therefore, when the `state.posts` property changes, the value of the `getPosts` property is also updated.
 
 2.  To make use of `getPosts` let's update the `PostList.vue` HTML section as seen below.
 
@@ -1782,9 +1779,9 @@ Now that our state is configured and we can extract some paginated post data we 
 
     Vue provides a number of helper directives which are HTML attributes that begin with `v-`.
 
-    - [`v-for`](https://vuejs.org/v2/guide/list.html) - Loops over a collection.  We used this before to loop over a collection of numbers for dummy data, but here we're using it to iterate over the collection returned by the `getPosts` computed property seen above.
-    - [`v-bind`](https://vuejs.org/v2/api/#v-bind) - Dynamically binds an attribute to a value.  Typically this is written in the form of `v-bind:attr-name="value"`, but if we exclude the attribute name then Vue will automatically pass (i.e. `bind`) every property of the object in question to the component.
-    - `:key` - `v-bind` also has a shorthand syntax that lets us avoid typing the `v-bind` prefix.  By using just the colon followed by the attribute we can replicate a binding, so here we're binding the `key` attribute to the value of `post.id`.
+    - [`v-for`](https://vuejs.org/v2/guide/list.html) - Loops over a collection. We used this before to loop over a collection of numbers for dummy data, but here we're using it to iterate over the collection returned by the `getPosts` computed property seen above.
+    - [`v-bind`](https://vuejs.org/v2/api/#v-bind) - Dynamically binds an attribute to a value. Typically this is written in the form of `v-bind:attr-name="value"`, but if we exclude the attribute name then Vue will automatically pass (i.e. `bind`) every property of the object in question to the component.
+    - `:key` - `v-bind` also has a shorthand syntax that lets us avoid typing the `v-bind` prefix. By using just the colon followed by the attribute we can replicate a binding, so here we're binding the `key` attribute to the value of `post.id`.
 
 The `PostList` component is updated and is properly passing data to the `Post` instances it creates, but we need to update the `Post` component to actually display that data.
 
@@ -1850,32 +1847,13 @@ The `PostList` component is updated and is properly passing data to the `Post` i
     </script>
     ```
 
-    This may look a bit overwhelming at first, but really we've just added two types of data to the `Post` component: properties and computed properties.  Let's start with the properties list.
+    This may look a bit overwhelming at first, but really we've just added two types of data to the `Post` component: properties and computed properties. Let's start with the properties list. These properties are defined using the `@Prop` decorator to specify their types, name, default values, and so forth. The names are taken directly from the properties of our Dgraph predicates used by a Post node.
 
-    ```ts
-    @Prop(String) private id!: string;
-    @Prop(String) private author!: string;
-    @Prop(String) private created_utc!: Date;
-    @Prop(String) private domain!: string;
-    @Prop(Boolean) private is_self!: boolean;
-    @Prop(Number) private num_comments!: number;
-    @Prop(String) private permalink!: string;
-    @Prop(Number) private score!: number;
-    @Prop(String) private subreddit!: string;
-    @Prop(String) private thumbnail!: string;
-    @Prop({ default: 70 }) private thumbnail_height!: number;
-    @Prop({ default: 70 }) private thumbnail_width!: number;
-    @Prop(String) private title!: string;
-    @Prop(String) private url!: string;
-    ```
+    As mentioned before, computed properties are specified by a getter method within the class component, so we're using such computed properties to "calculate" additional logic. We won't go over them all, but `thumbnailUrl()` is a good example as it allows us to return the proper post thumbnail URL based on the possible values found in the database.
 
-    These properties are defined using the `@Prop` decorator to specify their types, name, default values, and so forth.  The names are taken directly from the properties of our Dgraph predicates used by a Post node.
+    {{% notice "tip" %}} The `thumbnailUrl()` property references two custom thumbnail images which you can download and add to your `src/assets/images/` directory to include them in your own project. They can be found in the [src/assets/images](https://github.com/GabeStah/dgraph-reddit/tree/master/src/assets/images) directory of the GitHub [repository](https://github.com/GabeStah/dgraph-reddit). {{% /notice %}}
 
-    As mentioned before, computed properties are specified by a getter method within the class component, so we're using such computed properties to "calculate" additional logic.  We won't go over them all, but `thumbnailUrl()` is a good example as it allows us to return the proper post thumbnail URL based on the possible values found in the database.
-
-    {{% notice "tip" %}} The `thumbnailUrl()` property references two custom thumbnail images which you can download and add to your `src/assets/images/` directory to include them in your own project.  They can be found in the [src/assets/images](https://github.com/GabeStah/dgraph-reddit/tree/master/src/assets/images) directory of the GitHub [repository](https://github.com/GabeStah/dgraph-reddit). {{% /notice %}}
-
-2.  Next, let's update the HTML section of the `Post.vue` component.  We'll go through each of the three `v-flex` elements one at time.
+2.  Next, let's update the HTML section of the `Post.vue` component. We'll go through each of the three `v-flex` elements one at time.
 
     ```html
     <v-flex class="votes" xs1 px-1 mx-1>
@@ -1885,7 +1863,7 @@ The `PostList` component is updated and is properly passing data to the `Post` i
     </v-flex>
     ```
 
-    The only change here is to use the actual `score` property passed to the `Post` component instance.  Vue's [text interpolation](https://vuejs.org/v2/guide/syntax.html#Interpolations) syntax merely requires surrounding a property value with double curly braces (aka "mustaches").  This syntax is used all the time within Vue templates, so you'll see it frequently.
+    The only change here is to use the actual `score` property passed to the `Post` component instance. Vue's [text interpolation](https://vuejs.org/v2/guide/syntax.html#Interpolations) syntax merely requires surrounding a property value with double curly braces (aka "mustaches"). This syntax is used all the time within Vue templates, so you'll see it frequently.
 
 3.  The second flexbox section should be updated as seen below.
 
@@ -1912,17 +1890,16 @@ The `PostList` component is updated and is properly passing data to the `Post` i
       <span class="title">
         <a :href="fullUrl" class="text--primary">{{ title }}</a>
         <span class="domain text--secondary caption ml-1 font-weight-bold"
-          >(<a :href="domainUrl" class="text--secondary accentuated">{{
-            domain
-          }}</a
+          >(<a :href="domainUrl" class="text--secondary accentuated"
+            >{{ domain }}</a
           >)</span
         >
       </span>
       <span class="tagline caption">
         submitted {{ created_utc | moment('from') }} by
-        <a class="accentuated" :href="authorUrl" v-if="hasAuthor">{{
-          author
-        }}</a>
+        <a class="accentuated" :href="authorUrl" v-if="hasAuthor"
+          >{{ author }}</a
+        >
         <span v-else>{{ author }}</span>
         to
         <a class="accentuated" :href="subredditUrl">r/{{ subreddit }}</a>
@@ -1955,9 +1932,9 @@ The `PostList` component is updated and is properly passing data to the `Post` i
     </v-flex>
     ```
 
-    Quite a lot has changed here, but the same rules as techniques used in the previous sections apply.  The first notable addition is `submitted {{ created_utc | moment('from') }}`.  The pipe character indicates a Vue [filter function](https://vuejs.org/v2/guide/filters.html), which simplifies text formatting within Vue templates.  In this case, we're using a special `moment()` filter function to transform the `created_utc` date into a human-readable "X seconds ago" format.
+    Quite a lot has changed here, but the same rules as techniques used in the previous sections apply. The first notable addition is `submitted {{ created_utc | moment('from') }}`. The pipe character indicates a Vue [filter function](https://vuejs.org/v2/guide/filters.html), which simplifies text formatting within Vue templates. In this case, we're using a special `moment()` filter function to transform the `created_utc` date into a human-readable "X seconds ago" format.
 
-    The other unknown addition is just below that in which we use the `v-if` and `v-else` directives to determine if the post has a valid author.  If so, a `<a>` link element is added to link to the author URL.  Otherwise, no link is set and the author is printed in plain text.  This mimics the Reddit behavior of `[deleted]` users who no longer have a user page, but may still have active comments or posts.
+    The other unknown addition is just below that in which we use the `v-if` and `v-else` directives to determine if the post has a valid author. If so, a `<a>` link element is added to link to the author URL. Otherwise, no link is set and the author is printed in plain text. This mimics the Reddit behavior of `[deleted]` users who no longer have a user page, but may still have active comments or posts.
 
 5.  The last step is to add the [`vue-moment` library](https://www.npmjs.com/package/vue-moment), which provides a filter function we can use in Vue that behaves similar to [`Moment.js`](http://momentjs.com/).
 
@@ -1972,44 +1949,689 @@ The `PostList` component is updated and is properly passing data to the `Post` i
     Vue.use(VueMoment);
     ```
 
-Alright, our `Post` component is updated and ready to display the data it receives from the parent `PostList` component.  Save everything and run `yarn serve` to check out the new post list, which will show the first `100` post records in the database.
+Alright, our `Post` component is updated and ready to display the data it receives from the parent `PostList` component. Save everything and run `yarn serve` to check out the new post list, which will show the first `100` post records in the database.
 
 ![Post List with Dgraph Data](/images/PostList-data.png)
 
-## Query Only Comments
+## Adding Infinite Scrolling
 
-```js
+The post list is working well, but one it's missing one of the defining features of mass-content sites like Reddit: infinite scrolling. When we scroll to the bottom of the post list it should immediately load the next page of posts inline, without loading a new page.
+
+1.  Let's start by adding the [vue-mugen-scroll](https://github.com/egoist/vue-mugen-scroll) library that includes some built-in helper functionality. For example, we could add infinite scrolling pretty easily by checking the current scroll vs the window height, but we'd also need to perform a number of sanity checks like debouncing. Using `vue-mugen-scroll` solves this for us.
+
+    ```bash
+    yarn add vue-mugen-scroll
+    ```
+
+2.  Open `src/components/PostList.vue` and the following `<mugen-scroll>` element immediately after our `<Post>` element.
+
+    ```html
+    <template>
+      <v-container grid-list-xs>
+        <Post v-for="post in getPosts" :key="post.id" v-bind="post"></Post>
+        <mugen-scroll :handler="getPaginatedPosts" :handleOnMount="false">
+          Loading...
+        </mugen-scroll>
+      </v-container>
+    </template>
+    ```
+
+    This tells the scroller to invoke the `getPaginatedPosts()` method when the bottom of the viewport is reached. Since our component loads the first data set on its own we don't need to invoke the handler on mount.
+
+3.  In the `<script>` section `import MugenScroll` and add the new `getPaginatedPosts()` method.
+
+    ```ts
+    // @ts-ignore
+    import MugenScroll from 'vue-mugen-scroll';
+
+    @Component({
+      components: { MugenScroll, Post }
+    })
+    export default class PostList extends Vue {
+      get getPosts() {
+        return this.$store.state.posts;
+      }
+
+      public async getPaginatedPosts() {
+        // Get post list.
+        await this.$store.dispatch(Types.Action.Post.Get.Paginated, {
+          first: 100,
+          offset: this.$store.state.posts.length
+        });
+      }
+
+      public async created() {
+        // Get post list.
+        await this.getPaginatedPosts();
+      }
+    }
+    ```
+
+    Since we're using the `mugen-scroll` component in the HTML section we need to include it in the referenced `components` property. We've also adjusted the logic of the component slightly, so the `created()` method just calls the `getPaginatedPosts()` method directly, so all our retrieval logic is in one spot. Retrieving posts is nearly identical to how it worked before, but we've changed the passed `offset` argument to equal to current length of the `state.posts` property. This handles pagination of the dataset automatically.
+
+That's all there is to it! If we save our changes and run `yarn serve` to see the new post list we can now infinitely scroll as seen below.
+
+<video autoplay muted loop muted="true" playsinline>
+    <source src="/video/post-list-infinite-scroll-2.webm" type="video/webm">
+    Sorry, your browser doesn't support embedded videos.
+</video>
+
+## Adding Link Views
+
+Now that our front page post list is complete the next milestone is to allow us to view the content of a given post.  Although it may be a bit confusing at first, Reddit's site terminology refers to the actual content of a given submission as a **link**.  This makes sense when a submission is a outside URL to another resource, but the same term is also used to describe `self` submissions that remain within Reddit.
+
+Therefore, while the front page post list view already handles outside content links for us, we need a component and router rule to handle the inner comment thread of a given link, which is in the form of `/r/:subreddit/comments/:link/:slug`.
+
+### Creating Custom Routes
+
+Routing is provided by [`vue-router`](https://router.vuejs.org/) and can be configured quite easily.  We already have the default route of `/` that renders the `Home` component, so we need to add another route to handle the `/r/:subreddit/comments/:link/:slug` route.
+
+1.  Open the `src/router.ts` file.
+2.  Add a new entry into the `routes` property with a `path` of `'/r/:subreddit/comments/:link/*'`.
+
+    ```ts
+    import Link from '@/components/Link.vue';/
+    // ..
+    export default new Router({
+      mode: 'history',
+      base: process.env.BASE_URL,
+      routes: [
+        {
+          path: '/',
+          name: 'home',
+          component: Home
+        },
+        {
+          path: '/r/:subreddit/comments/:link/*',
+          name: 'link',
+          component: Link
+        }
+      ]
+    });
+    ```
+
+    Make sure to also import the `Link` component at the top.  This route will now match link-specific URLs.
+
+### Adding Comments to the State
+
+Since an internal link view displays a list of discussion comments we need to add comments to the app state and appropriate actions and mutations to update that property.
+
+1.  Open `src/state/state.ts` and add the `comments` property with a default value of an empty array.
+
+    ```ts
+    export const State = {
+      comments: [],
+      posts: []
+    };
+    ```
+
+2.  Open `src/state/types.ts` and add the new `Comment.Get.Paginated` action and `Comment.Set.Paginated` mutation types.
+
+    ```ts
+    export const Types = {
+      Action: {
+        Comment: {
+          Get: {
+            Paginated: 'Comment.Get.Paginated'
+          }
+        },
+        Post: {
+          Get: {
+            Paginated: 'Post.Get.Paginated'
+          }
+        }
+      },
+      Mutation: {
+        Comment: {
+          Set: {
+            Paginated: 'Comment.Set.Paginated'
+          }
+        },
+        Post: {
+          Set: {
+            Paginated: 'Post.Set.Paginated'
+          }
+        }
+      }
+    };
+    ```
+
+3.  Open `src/state/mutations.ts` and add a new entry for the `Comment.Set.Paginated` mutation method.
+
+    ```ts
+    import { Types } from '@/state/types';
+
+    export const Mutations = {
+      [Types.Mutation.Comment.Set.Paginated](
+        state: any,
+        { comments }: { comments: any[] }
+      ) {
+        state.comments = [...state.comments, ...comments];
+      },
+      // ...
+    };
+    ```
+
+    Similar to how we update `posts`, `state.comments` are combined with existing comments in the state since this pagination mutation incrementally adds data.
+
+4.  Next, open `src/state/actions.ts` and add the following entry for the `Comment.Get.Paginated` action method.
+
+    ```ts
+    export const Actions = {
+      async [Types.Action.Comment.Get.Paginated](
+        { commit }: { commit: any },
+        {
+          link,
+          first = 50,
+          offset = 0
+        }: { link: string; first?: number; offset?: number }
+      ) {
+        const { data } = await new DgraphAdapter().query(
+          `query comments($link: string, $first: int, $offset: int) {
+            data(func: eq(link_id, $link), first: $first, offset: $offset) {
+              uid
+              expand(_all_) {
+                uid
+                expand(_all_)
+              }
+            }
+          }`,
+          { $link: `t3_${link}`, $first: first, $offset: offset }
+        );
+
+        commit(Types.Mutation.Comment.Set.Paginated, { comments: data });
+      },
+    // ...
+    }
+    ```
+
+    This action invokes a GraphQL+- query to get all comments based on the passed `link` id argument.  You'll recall the route we'll be parsing of `'/r/:subreddit/comments/:link/*'`.  The `:link` param from that URL is in the database under the `link_id` predicate.  The values are unique strings that look something like this: `t3_7ub10c`.
+
+    Reddit IDs are a unique [Base36](https://en.wikipedia.org/wiki/Base36) value prefixed by the relevant Reddit content type as seen below.
+
+    | Prefix | Type      |
+    | ------ | --------- |
+    | t1\_   | Comment   |
+    | t2\_   | Account   |
+    | t3\_   | Link      |
+    | t4\_   | Message   |
+    | t5\_   | Subreddit |
+    | t6\_   | Award     |
+
+    Therefore, a comment with a `link_id` predicate value of `t3_7ub10c` corresponds to a submission/post with the id `7ub10c`.  That's why our query parameter object above prefixes the `link` value with `t3_`.
+
+### Creating the Comment Component
+
+Now that we can detect link routes and our state is configured to retrieve comments based on those matching link IDs we can add a link view.  Reddit link views are just a collection of comments that makeup that link's discussion, so we'll start with the `Comment.vue` component.
+
+1.  Create a new `src/components/Comment.vue` file.
+2.  Add the following `<template>` HTML.
+
+    ```html
+    <template>
+      <v-layout class="comment" row wrap my-2>
+        <v-flex class="votes" xs1 px-1 mx-1>
+          <v-icon class="arrow up accentuated">arrow_upward</v-icon>
+          <v-icon class="arrow down accentuated">arrow_downward</v-icon>
+        </v-flex>
+        <v-flex class="content" xs11 px-1 mx-1>
+          <span class="tagline caption">
+            <a class="accentuated" :href="authorUrl" v-if="hasAuthor">{{
+              author
+            }}</a>
+            <span v-else>{{ author }}</span>
+            <span class="score">{{ score }} points</span>
+            {{ created_utc | moment('from') }}
+          </span>
+          <span class="body" v-html="body"></span>
+          <ul class="buttons font-weight-medium">
+            <li class="permalink">
+              <a :href="permalink" class="text--secondary accentuated">permalink</a>
+            </li>
+            <li class="source">
+              <a href="#" class="text--secondary accentuated">share</a>
+            </li>
+            <li class="embed">
+              <a href="#" class="text--secondary accentuated">save</a>
+            </li>
+            <li class="save">
+              <a href="#" class="text--secondary accentuated">hide</a>
+            </li>
+            <li class="report">
+              <a href="#" class="text--secondary accentuated">report</a>
+            </li>
+            <li class="award">
+              <a href="#" class="text--secondary accentuated">give award</a>
+            </li>
+            <li class="reply">
+              <a href="#" class="text--secondary accentuated">reply</a>
+            </li>
+            <li class="hide-children">
+              <a href="#" class="text--secondary accentuated"
+                >hide child comments</a
+              >
+            </li>
+          </ul>
+        </v-flex>
+      </v-layout>
+    </template>
+    ```
+
+    Reddit uses very similar formatting for comments as it does for posts, so we're able to reuse a significant amount of the layout found in the `Post.vue`.  A comment consists of voting arrows on the side, the author at the top, the score of that comment, created date, body text of the actual comment, and then a series of interactive buttons at the bottom.
+
+2.  There are _a lot_ of properties we're using within the template, so the majority of the `<script>` section is just property definition.
+  
+    ```ts
+    <script lang="ts">
+    import { Component, Prop, Vue } from 'vue-property-decorator';
+
+    @Component
+    export default class Comment extends Vue {
+      @Prop(String) private id!: string;
+      @Prop(String) private author!: string;
+      @Prop(String) private author_flair_text!: string;
+      @Prop(String) private body!: string;
+      @Prop(Boolean) private can_gild!: boolean;
+      @Prop(Number) private controversiality!: number;
+      @Prop(String) private created_utc!: Date;
+      @Prop(String) private distinguished!: string;
+      @Prop(Boolean) private edited!: boolean;
+      @Prop(Number) private gilded!: number;
+      @Prop(Boolean) private is_submitter!: boolean;
+      @Prop(String) private link_id!: string;
+      @Prop(String) private parent_id!: string;
+      @Prop(String) private permalink!: string;
+      @Prop(String) private retrieved_on!: Date;
+      @Prop(Number) private score!: number;
+      @Prop(Boolean) private stickied!: boolean;
+      @Prop(String) private subreddit!: string;
+      @Prop(String) private subreddit_id!: string;
+      @Prop(String) private subreddit_type!: string;
+
+      get authorUrl() {
+        return `/user/${this.author}`;
+      }
+
+      get hasAuthor() {
+        return this.author !== '[deleted]';
+      }
+
+      get subredditUrl() {
+        return `/r/${this.subreddit}`;
+      }
+    }
+    </script>
+    ```
+
+3.  Lastly, add the following `<style>` section.
+
+    ```css
+    <style scoped lang="scss">
+    .votes {
+      max-width: 20px;
+      text-align: center;
+
+      * {
+        display: block;
+      }
+    }
+
+    .content {
+      a {
+        text-decoration: none;
+      }
+
+      .body {
+        display: block;
+      }
+
+      .buttons {
+        display: block;
+        list-style-type: none;
+        padding: 1px 0;
+
+        li {
+          display: inline-block;
+          line-height: 1.5em;
+          padding-right: 0.33em;
+        }
+      }
+
+      .score {
+        padding: 0 0.25em;
+      }
+    }
+    </style>
+    ```
+
+The `Comment.vue` component is now ready to go, we just have to pass in a comment prop it can display.
+
+### Creating the Link Component
+
+A `Link.vue` component will behave similar to the `PostList.vue` component by acting as a parent view for comments.
+
+1.  Create a new Vue file at `src/components/Link.vue`.
+2.  Add the following to the HTML template section.
+
+    ```html
+    <template>
+      <v-container grid-list-xs>
+        <Comment
+          v-for="comment in getComments"
+          :key="comment.id"
+          v-bind="comment"
+        ></Comment>
+        <mugen-scroll
+          :handler="getPaginatedComments"
+          :handleOnMount="false"
+        ></mugen-scroll>
+      </v-container>
+    </template>
+    ```
+
+    Here we're just creating a container and looping through all `Comments` provided by the `getComments` method.  We'll also use the same infinite scrolling helper we used in the `PostList.vue`.
+
+3.  Let's next add the `<script>` section with the following code.
+
+    ```ts
+    <script lang="ts">
+    import { Component, Prop, Vue } from 'vue-property-decorator';
+    import Comment from '@/components/Comment.vue';
+    import { Types } from '@/state';
+    // @ts-ignore
+    import MugenScroll from 'vue-mugen-scroll';
+
+    @Component({
+      components: { MugenScroll, Comment }
+    })
+    export default class Link extends Vue {
+      private loading = false;
+
+      get getComments() {
+        return this.$store.state.comments;
+      }
+
+      public async created() {
+        await this.getPaginatedComments();
+      }
+
+      public async getPaginatedComments() {
+        await this.$store.dispatch(Types.Action.Comment.Get.Paginated, {
+          link: this.$route.params.link,
+          first: 50,
+          offset: this.$store.state.comments.length
+        });
+      }
+    }
+    </script>
+    ```
+
+    The logic is similar to what we used in `PostList.vue`.  the `getPaginatedComments()` method dispatches the `Comment.Get.Paginated` action and retrieves the first `50` comments with an offset of the current `state.comments` length.  We also pass the current `link` param obtained from the route.  As we configured in the router, a route in the form of `/r/:subreddit/comments/:link/*` passes the `:link` param ID to the action and performs a Dgraph query to retrieve matching records.
+
+## Optimizing the Imported Data Set
+
+We're all set and should now be able to navigate to any link URL (i.e. `/r/:subreddit/comments/:link/*`).  When viewing the home page post list these links are found in the post content for `self.` posts or by clicking the **comments** button of a post.
+
+However, while this functionality works, we're running into an unforeseen problem: A number of link views simply show no comments.
+
+![Empty Comments Link View](/images/link-view-no-comments.png)
+
+The problem here is our imported data set is incomplete.  While we have tens of thousands of comments in the database, Reddit receives _millions_ of comments per day, so our data set that contains data from just **two** days of submissions and comments contains a lot of "gaps."  It isn't all that likely that a given submission within those two days also has a comment from those two days _and_ is one of the comments we imported.
+
+The solution is to add some minor logic to our data import functions and perform a new import.  We'll implement a few simple rules to dramatically improve the quality of our imported Reddit data, without having to add massive amounts of extra data or download more data dump files.
+
+- Import comments into the database _first_.
+- Import submission posts second, but run each of them through a validation function that checks the following criteria:
+  - The post must have at least one comment.  While this isn't accurate to the real Reddit, it's better for our purposes in this tutorial to only look at posts that were commented on.
+  - At least one comment made on the post should be within the collection of comments already contained in the database.
+
+With these validation rules setup we can ensure that we're only adding posts that contain comments that are within the Dgraph database, which will eliminate the empty link view seen above.
+
+### Adjusting the Dgraph Mutation from Stream Logic
+
+The `DgraphAdapter.mutationFromStream` method works great for importing from our massive data sets, but we need to add some additional logic so we can validate data before pushing it to the database.
+
+Open `src/dgraph/DgraphAdapter.ts` and update the `mutationFromStream()` method to look like the following.
+
+```ts
+public static async mutateFromStream({
+  stream,
+  batchSize = 50,
+  limit = 150,
+  offset = 0,
+  validator
+}: {
+  stream: ReadStream;
+  batchSize?: number;
+  limit?: number;
+  offset?: number;
+  validator?: (data: any) => void;
+}) {
+  const adapter = new DgraphAdapter();
+  let batch: any[] = [];
+  let invalidCount = 0;
+  let skippedCount = 0;
+  let totalCount = 0;
+  const bar = new CliProgress.Bar(
+    {
+      stopOnComplete: true,
+      format:
+        '{bar} {percentage}% | Elapsed: {duration_formatted} | ETA: {eta_formatted} | {value}/{total} records'
+    },
+    CliProgress.Presets.shades_classic
+  );
+  // Start progress bar with maximum of limit.
+  bar.start(limit, 0);
+
+  const syncMutation = async (readStream: ReadStream, event?: string) => {
+    try {
+      // Pause during async.
+      readStream.pause();
+      // Mutate batch
+      const response = await adapter.mutate({ request: batch });
+      // Reset batch.
+      batch = [];
+      // Update progress bar.
+      bar.update(totalCount);
+      // Resume after async.
+      readStream.resume();
+    } catch (error) {
+      // Stop progress bar.
+      bar.stop();
+      console.log(error);
+    }
+  };
+
+  return new Promise((resolve, reject) => {
+    stream
+      .pipe(es.split())
+      .pipe(es.parse())
+      .on('data', async function(this: ReadStream, data: any) {
+        if (offset && offset > 0 && skippedCount < offset) {
+          skippedCount++;
+        } else if (validator ? validator(data) : true) {
+          // Add data to batch and update total count.
+          batch.push(data);
+          totalCount++;
+
+          if (totalCount >= limit) {
+            // Close stream if total exceeds limit.
+            this.destroy();
+          } else if (batch.length === batchSize) {
+            // Synchronously mutate if batch length meets batchSize.
+            await syncMutation(this, 'data');
+          }
+        } else {
+          invalidCount++;
+        }
+      })
+      .on('error', (error: Error) => {
+        // Stop progress bar.
+        bar.stop();
+        console.log(error);
+        reject(error);
+      })
+      .on('close', async function(this: ReadStream) {
+        // Synchronously mutate if batch contains any extraneous records.
+        if (batch.length > 0) {
+          await syncMutation(this, 'close');
+        }
+        // Stop progress bar.
+        bar.stop();
+        resolve(
+          `Processed ${totalCount +
+            invalidCount +
+            skippedCount} records (${totalCount} mutated, ${invalidCount} invalid, ${skippedCount} skipped).`
+        );
+      });
+  });
+}
+```
+
+We added two new parameters: `offset?: number;` and `validator?: (data: any) => void;`.  We won't need to use `offset` here, but it seemed useful to include that functionality so we can skip a certain number of records from a data stream in the future, if needed.  The `validator` argument is a function that accepts a single argument itself.  We'll use it to determine if the passed `data` object argument is valid and should be included in the exported data set or not.
+
+The only other significant addition is in the `.on('data', ...)` function.  We start by checking if there's an `offset` specified, in which case we want to skip that many records before processing begins.
+
+Next we check if a `validator` function was passed and, if so, whether the result of validating the current `data` object is true or not.  If the `data` is valid, it is processed and added to a batch set as normal, otherwise we ignore that `data` and increment the `invalidCount`.
+
+`on('close', ...)` now outputs the total number of records processed, including those that were mutated, skipped, and considered invalid.
+
+Open the `gulpfile.ts` so we can adjust the `db:generate:data` task to perform the validation rules discussed above.
+
+```ts
+gulp.task('db:generate:data', async () => {
+  try {
+    const query = `{
+      data(func: has(link_id)) {
+        link_id
+      }
+    }`;
+    // Get current comments
+    const comments = _.map(
+      (await new DgraphAdapter().query(query)).data,
+      comment => comment.link_id.substring(3)
+    );
+    const args = minimist(process.argv.slice(3), {
+      default: {
+        batchSize: 250,
+        limit: 1000,
+        offset: 0,
+        path: './src/data/RS_2018-02-01'
+      }
+    });
+    const stream = fs.createReadStream(args.path, {
+      flags: 'r'
+    });
+    // Include optional command line arguments in options.
+    const result = await DgraphAdapter.mutateFromStream(
+      Object.assign(
+        {
+          stream,
+          validator: (data: any) => {
+            if (
+              data.domain &&
+              !data.crosspost_parent &&
+              !data.over_18 &&
+              // If comments exist check that post contains at least 1.
+              data.num_comments > 0 &&
+              (comments && comments.length > 0
+                ? _.includes(comments, data.id)
+                : true)
+            ) {
+              // Posts
+              return true;
+            } else if (data.link_id) {
+              // Comments
+              return true;
+            }
+            return false;
+          }
+        },
+        args
+      )
+    );
+    console.log(result);
+  } catch (error) {
+    throw error;
+  }
+});
+```
+
+As mentioned above, we'll be adding comments to the database first, so the task starts by querying Dgraph and retrieving the full collection of comment nodes.
+
+<!-- prettier-ignore-start -->
+{{< runnable >}}
 {
   data(func: has(link_id)) {
-    count(uid)
+    link_id
   }
 }
-```
+{{< /runnable >}}
+<!-- prettier-ignore-end -->
 
-```js
-{
-  data(func: has(author)) @filter(has(body)) {
-    count(uid)
-  }
-}
-```
+As discussed in the [Adding Comments to the State](#adding-comments-to-the-state) section Reddit prefixes link IDs with `t3_` so the `db:generate:data` task removes that prefix since each post node's `id` predicate _does not_ contain that `t3_` prefix.
 
-## Query Only Posts
+Everything else in this task function is the same as before, except we're passing the `validator` property to the `DgraphAdapter.mutateFromStream` method call.  This validator function expects the single `data` argument and performs the validation rules discussed above.  For `posts` we ensure they aren't crossposts, that they aren't NSFW, that they have at least one comment, and that at least one of those comments has a `link_id` equal to the `id` of the post record.
 
-```js
-{
-  data(func: has(domain)) @filter(not has(crosspost_parent)) {
-    count(uid)
-  }
-}
-```
+### Update the Database Data Set
 
-## Query Only Posts > Crossposts
+That's all the validation logic we need, so now we just have to update the data set within the database to use our new validation rules.
 
-```js
-{
-  data(func: has(crosspost_parent)) {
-    count(uid)
-  }
-}
-```
+1.  Start by dropping the data with `gulp db:drop` and then reset the schema with `gulp db:schema:alter`.
+
+    ```bash
+    $ gulp db:drop && gulp db:schema:alter
+    [03:13:24] Requiring external module ts-node/register
+    [03:13:25] Using gulpfile D:\work\dgraph\projects\dgraph-reddit\gulpfile.ts
+    [03:13:25] Starting 'db:drop'...
+    All Dgraph data dropped.
+    [03:13:25] Finished 'db:drop' after 438 ms
+    [03:13:26] Requiring external module ts-node/register
+    [03:13:27] Using gulpfile D:\work\dgraph\projects\dgraph-reddit\gulpfile.ts
+    [03:13:27] Starting 'db:schema:alter'...
+    Dgrap schema altered.
+    Dgrap schema altered.
+    [03:13:27] Finished 'db:schema:alter' after 77 ms
+    ```
+
+2.  Import comment data with `gulp db:generate:data`.  We'll be using a `limit` of `50000` from each file this time, but feel free to adjust this number to suit your needs.
+
+    ```bash
+    $ gulp db:generate:data --limit 50000 --path ./src/data/RC_2018-02-01 && gulp db:generate:data --limit 50000 --path ./src/data/RC_2018-02-02
+    [03:21:30] Requiring external module ts-node/register
+    [03:21:32] Using gulpfile D:\work\dgraph\projects\dgraph-reddit\gulpfile.ts
+    [03:21:32] Starting 'db:generate:data'...
+    ████████████████████████████████████████ 100% | Elapsed: 1m45s | ETA: 0s | 50000/50000 records
+    Processed 50000 records (50000 mutated, 0 invalid, 0 skipped).
+    [03:23:17] Finished 'db:generate:data' after 1.75 min
+    [03:23:18] Requiring external module ts-node/register
+    [03:23:20] Using gulpfile D:\work\dgraph\projects\dgraph-reddit\gulpfile.ts
+    [03:23:20] Starting 'db:generate:data'...
+    ████████████████████████████████████████ 100% | Elapsed: 2m51s | ETA: 0s | 50000/50000 records
+    Processed 50000 records (50000 mutated, 0 invalid, 0 skipped).
+    [03:26:11] Finished 'db:generate:data' after 2.85 min
+    ```
+
+3.  Lastly, import post data with a `limit` of `5000` for each day.
+
+    ```bash
+    $ gulp db:generate:data --limit 5000 --path ./src/data/RS_2018-02-01 && gulp db:generate:data --limit 5000 --path ./src/data/RS_2018-02-02
+    [03:26:46] Requiring external module ts-node/register
+    [03:26:48] Using gulpfile D:\work\dgraph\projects\dgraph-reddit\gulpfile.ts
+    [03:26:48] Starting 'db:generate:data'...
+    ████████████████████████████████████████ 100% | Elapsed: 1m34s | ETA: 0s | 5000/5000 records
+    Processed 189813 records (5000 mutated, 184813 invalid, 0 skipped).
+    [03:28:23] Finished 'db:generate:data' after 1.58 min
+    [03:28:24] Requiring external module ts-node/register
+    [03:28:26] Using gulpfile D:\work\dgraph\projects\dgraph-reddit\gulpfile.ts
+    [03:28:26] Starting 'db:generate:data'...
+    ██████████████░░░░░░░░░░░░░░░░░░░░░░░░░░ 34% | Elapsed: 2m34s | ETA: 5m5s | 1688/5000 records
+    Processed 376678 records (1688 mutated, 374990 invalid, 0 skipped).
+    [03:31:02] Finished 'db:generate:data' after 2.58 min
+    ```
+
+    You'll notice our validator is working as expected and skipping the _majority_ of the post submission records because they fail validation.  In fact, if you used the same data dump files as in this tutorial, you'll see the second file doesn't even contain enough valid post records to meet our `limit` of `5000`.  Instead, the entire file is processed with only about `1700` valid submission to add.
+
+In total this new import should take about 10 minutes to process but the end result is a much nicer data set within Dgraph!  Try running the app again with `yarn serve` and you should be able to click on _any_ **comments** link within the front page post list to navigate to that discussion and see at least one comment.  No more empty link views!
+
+![Link View Example](/images/link-view.gif)

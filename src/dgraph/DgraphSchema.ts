@@ -10,7 +10,7 @@ export const DgraphSchema = {
     distinguished: string @index(hash) @count .
     edited: bool @index(bool) @count .
     gilded: int @index(int) @count .
-    id: string @index(hash) @count .
+    id: string @index(hash, trigram) @count .
     is_submitter: bool @index(bool) @count .
     link_id: string @index(hash) @count .
     parent_id: string @index(hash) @count .
@@ -33,7 +33,7 @@ export const DgraphSchema = {
     gilded: int @index(int) @count .
     hidden: bool @index(bool) @count .
     hide_score: bool @index(bool) @count .
-    id: string @index(hash) .
+    id: string @index(hash, trigram) .
     is_crosspostable: bool @index(bool) @count .
     is_reddit_media_domain: bool @index(bool) .
     is_self: bool @index(bool) @count .

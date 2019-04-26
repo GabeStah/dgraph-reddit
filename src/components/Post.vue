@@ -9,7 +9,7 @@
       <a :href="fullUrl">
         <v-img
           :src="thumbnailUrl"
-          :lazy-src="thumbnailUrl"
+          :lazy-src="thumbnailPlaceholderUrl"
           aspect-ratio="1"
           height="70"
           width="70"
@@ -37,6 +37,11 @@
       </span>
       <ul class="buttons font-weight-medium">
         <li class="comment">
+          <!--          <router-link-->
+          <!--            :to="{ name: 'link', params: { subreddit: subreddit, link: id } }"-->
+          <!--          >-->
+          <!--            {{ num_comments }} comments-->
+          <!--          </router-link>-->
           <a :href="permalink" class="text--secondary accentuated"
             >{{ num_comments }} comments</a
           >
@@ -102,6 +107,14 @@ export default class Post extends Vue {
 
   get hasAuthor() {
     return this.author !== '[deleted]';
+  }
+
+  get thumbnailPlaceholderUrl() {
+    if (this.thumbnail === 'self') {
+      return require('../assets/images/thumbnail-self.png');
+    } else {
+      return require('../assets/images/thumbnail-default.png');
+    }
   }
 
   get subredditUrl() {

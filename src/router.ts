@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Home from './views/Home.vue';
+import Link from '@/components/Link.vue';
+import Subreddit from '@/components/Subreddit.vue';
 
 Vue.use(Router);
 
@@ -12,14 +14,16 @@ export default new Router({
       path: '/',
       name: 'home',
       component: Home
+    },
+    {
+      path: '/r/:subreddit/comments/:link/*',
+      name: 'link',
+      component: Link
+    },
+    {
+      path: '/r/:subreddit',
+      name: 'subreddit',
+      component: Subreddit
     }
-    // {
-    //   path: '/about',
-    //   name: 'about',
-    //   // route level code-splitting
-    //   // this generates a separate chunk (about.[hash].js) for this route
-    //   // which is lazy-loaded when the route is visited.
-    //   component: () => import(/* webpackChunkName: "about" */ './views/About.vue'),
-    // },
   ]
 });

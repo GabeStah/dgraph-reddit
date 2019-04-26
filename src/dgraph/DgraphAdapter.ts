@@ -23,19 +23,27 @@ export class DgraphAdapter {
    * @param batchSize - Maximum of JSON objects to pass in each Dgraph mutation.
    * @param limit - Maximum number of JSON objects to process in total.
    *  Useful for handling streams from massive data sets.
+   * @param offset - Number of records to skip over within stream.
+   * @param validator - Validation function executed on each record.
    */
   public static async mutateFromStream({
     stream,
     batchSize = 50,
-    limit = 150
+    limit = 150,
+    offset = 0,
+    validator
   }: {
     stream: ReadStream;
     batchSize?: number;
     limit?: number;
+    offset?: number;
+    validator?: (data: any) => void;
   }) {
     const adapter = new DgraphAdapter();
     let batch: any[] = [];
-    let total = 0;
+    let invalidCount = 0;
+    let skippedCount = 0;
+    let totalCount = 0;
     const bar = new CliProgress.Bar(
       {
         stopOnComplete: true,
@@ -56,7 +64,7 @@ export class DgraphAdapter {
         // Reset batch.
         batch = [];
         // Update progress bar.
-        bar.update(total);
+        bar.update(totalCount);
         // Resume after async.
         readStream.resume();
       } catch (error) {
@@ -71,16 +79,22 @@ export class DgraphAdapter {
         .pipe(es.split())
         .pipe(es.parse())
         .on('data', async function(this: ReadStream, data: any) {
-          // Add data to batch and update total count.
-          batch.push(data);
-          total++;
+          if (offset && offset > 0 && skippedCount < offset) {
+            skippedCount++;
+          } else if (validator ? validator(data) : true) {
+            // Add data to batch and update total count.
+            batch.push(data);
+            totalCount++;
 
-          if (total >= limit) {
-            // Close stream if total exceeds limit.
-            this.destroy();
-          } else if (batch.length === batchSize) {
-            // Synchronously mutate if batch length meets batchSize.
-            await syncMutation(this, 'data');
+            if (totalCount >= limit) {
+              // Close stream if total exceeds limit.
+              this.destroy();
+            } else if (batch.length === batchSize) {
+              // Synchronously mutate if batch length meets batchSize.
+              await syncMutation(this, 'data');
+            }
+          } else {
+            invalidCount++;
           }
         })
         .on('error', (error: Error) => {
@@ -96,7 +110,11 @@ export class DgraphAdapter {
           }
           // Stop progress bar.
           bar.stop();
-          resolve(`Stream closed, processed ${total} out of ${limit} records.`);
+          resolve(
+            `Processed ${totalCount +
+              invalidCount +
+              skippedCount} records (${totalCount} mutated, ${invalidCount} invalid, ${skippedCount} skipped).`
+          );
         });
     });
   }

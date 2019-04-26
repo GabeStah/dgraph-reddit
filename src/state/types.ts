@@ -1,5 +1,10 @@
 export const Types = {
   Action: {
+    Comment: {
+      Get: {
+        Paginated: 'Comment.Get.Paginated'
+      }
+    },
     Post: {
       Get: {
         Paginated: 'Post.Get.Paginated'
@@ -7,6 +12,11 @@ export const Types = {
     }
   },
   Mutation: {
+    Comment: {
+      Set: {
+        Paginated: 'Comment.Set.Paginated'
+      }
+    },
     Post: {
       Set: {
         Paginated: 'Post.Set.Paginated'

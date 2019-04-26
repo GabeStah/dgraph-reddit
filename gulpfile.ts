@@ -4,9 +4,8 @@ import gulp from 'gulp';
 import { DgraphAdapter } from './src/dgraph/DgraphAdapter';
 import { DgraphSchema } from './src/dgraph/DgraphSchema';
 import minimist from 'minimist';
-import { generateData } from './src/dgraph';
 import * as fs from 'fs';
-import es from 'event-stream';
+import * as _ from 'lodash';
 
 gulp.task('db:drop', () => {
   try {
@@ -66,8 +65,23 @@ gulp.task('db:query:test', async () => {
 
 gulp.task('db:generate:data', async () => {
   try {
+    const query = `{
+      data(func: has(link_id)) {
+        link_id
+      }
+    }`;
+    // Get current comments
+    const comments = _.map(
+      (await new DgraphAdapter().query(query)).data,
+      comment => comment.link_id.substring(3)
+    );
     const args = minimist(process.argv.slice(3), {
-      default: { batchSize: 250, limit: 1000, path: './src/data/RS_2018-02-01' }
+      default: {
+        batchSize: 250,
+        limit: 1000,
+        offset: 0,
+        path: './src/data/RS_2018-02-01'
+      }
     });
     const stream = fs.createReadStream(args.path, {
       flags: 'r'
@@ -76,7 +90,26 @@ gulp.task('db:generate:data', async () => {
     const result = await DgraphAdapter.mutateFromStream(
       Object.assign(
         {
-          stream
+          stream,
+          validator: (data: any) => {
+            if (
+              data.domain &&
+              !data.crosspost_parent &&
+              !data.over_18 &&
+              // If comments exist check that post contains at least 1.
+              data.num_comments > 0 &&
+              (comments && comments.length > 0
+                ? _.includes(comments, data.id)
+                : true)
+            ) {
+              // Posts
+              return true;
+            } else if (data.link_id) {
+              // Comments
+              return true;
+            }
+            return false;
+          }
         },
         args
       )
