@@ -1,10 +1,10 @@
 import {
-  Assigned,
   DgraphClient,
   DgraphClientStub,
   Mutation,
   Response
 } from 'dgraph-js-http';
+import { Assigned } from 'dgraph-js-http';
 import { ReadStream } from 'fs';
 import es from 'event-stream';
 import * as CliProgress from 'cli-progress';

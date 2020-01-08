@@ -1,4 +1,4 @@
-baseURL = "https://dgraph-reddit-tutorial.pingpub.dev"
+baseURL = "https://dgraph-reddit-tutorial.netlify.com"
 languageCode = "en-us"
 title = "Dgraph Reddit Tutorial"
 author = "Gabe Wyatt"
